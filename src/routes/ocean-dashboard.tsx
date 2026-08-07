@@ -49,7 +49,7 @@ const chartStyle = {
 } as const;
 
 function OceanDashboard() {
-  const [region, setRegion] = useState(oceanRegions[4]);
+  const [region, setRegion] = useState(oceanRegions[4]!);
   const [live, setLive] = useState(true);
 
   return (
