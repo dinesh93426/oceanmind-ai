@@ -1,22 +1,37 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  Bot,
   Copy,
   Download,
   FileUp,
+  KeyRound,
+  Loader2,
   Mic,
   Pin,
   Plus,
   Send,
   Share2,
+  Sparkles,
   StickyNote,
   Waves,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { OpenRouterKeyModal } from "@/components/ocean/OpenRouterKeyModal";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { suggestedPrompts } from "@/lib/ocean-data";
+import {
+  getOpenRouterApiKey,
+  getOpenRouterModel,
+  OPENROUTER_MODELS,
+  sendOpenRouterChatMessage,
+  setOpenRouterModel,
+  type OpenRouterMessage,
+} from "@/lib/openrouter-api";
 
 export const Route = createFileRoute("/marine-ai")({
   head: () => ({
@@ -25,26 +40,33 @@ export const Route = createFileRoute("/marine-ai")({
       {
         name: "description",
         content:
-          "Ask an AI marine research assistant about currents, coral reefs, migration and blooms, with references and export options.",
+          "Ask OpenRouter DeepSeek AI marine research assistant about currents, coral reefs, species migration and blooms with scientific citations.",
       },
       { property: "og:title", content: "Marine AI Research Assistant — OceanMind AI" },
       {
         property: "og:description",
-        content: "A research-grade ocean science chat assistant with citations and data uploads.",
+        content: "Research-grade ocean science chat assistant powered by OpenRouter DeepSeek Chat model.",
       },
     ],
   }),
   component: MarineAI,
 });
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = {
+  role: "user" | "assistant";
+  content: string;
+  source?: string;
+  modelUsed?: string;
+  error?: boolean;
+};
 
-const seed: Msg[] = [
+const seedMessages: Msg[] = [
   { role: "user", content: "How do ocean currents affect tuna migration?" },
   {
     role: "assistant",
     content:
       "Tuna track thermal fronts rather than fixed routes. Western boundary currents such as the Kuroshio and Gulf Stream concentrate prey along sharp temperature gradients, so schools follow the 22–28 °C envelope as it shifts seasonally.\n\n| Driver | Effect on migration |\n| --- | --- |\n| Thermal fronts | Aggregation of prey and schooling |\n| Eddy fields | Localised feeding hotspots |\n| ENSO phase | Longitudinal displacement of stocks |\n\nReferences: Nakamura et al. 2026; Duarte & Mehta 2025.",
+    source: "DeepSeek V3 Chat",
   },
 ];
 
@@ -64,7 +86,17 @@ function renderContent(text: string) {
         </div>
       );
     }
+
+    if (line.startsWith("- ") || line.startsWith("– ") || line.startsWith("* ")) {
+      return (
+        <li key={i} className="ml-4 list-disc text-sm leading-relaxed text-foreground">
+          {line.replace(/^[-–*]\s+/, "")}
+        </li>
+      );
+    }
+
     if (!line.trim()) return <div key={i} className="h-2" />;
+
     return (
       <p key={i} className="text-sm leading-relaxed">
         {line}
@@ -74,33 +106,78 @@ function renderContent(text: string) {
 }
 
 function MarineAI() {
-  const [messages, setMessages] = useState<Msg[]>(seed);
+  const [messages, setMessages] = useState<Msg[]>(seedMessages);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("deepseek/deepseek-chat");
+  const [openRouterModalOpen, setOpenRouterModalOpen] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
 
-  function send(text: string) {
+  useEffect(() => {
+    setHasApiKey(Boolean(getOpenRouterApiKey()));
+    setSelectedModel(getOpenRouterModel());
+
+    const handleKeyChange = () => setHasApiKey(Boolean(getOpenRouterApiKey()));
+    window.addEventListener("openrouter-key-changed", handleKeyChange);
+    return () => window.removeEventListener("openrouter-key-changed", handleKeyChange);
+  }, []);
+
+  const handleModelChange = (modelId: string) => {
+    setSelectedModel(modelId);
+    setOpenRouterModel(modelId);
+  };
+
+  async function send(text: string) {
     const q = text.trim();
-    if (!q) return;
-    setMessages((m) => [...m, { role: "user", content: q }]);
+    if (!q || typing) return;
+
+    const updatedUserMsgs = [...messages, { role: "user" as const, content: q }];
+    setMessages(updatedUserMsgs);
     setInput("");
     setTyping(true);
-    setTimeout(() => {
-      setTyping(false);
-      setMessages((m) => [
-        ...m,
+
+    try {
+      const historyPayload: OpenRouterMessage[] = updatedUserMsgs.map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const res = await sendOpenRouterChatMessage(historyPayload, selectedModel);
+
+      setMessages((prev) => [
+        ...prev,
         {
           role: "assistant",
-          content:
-            "Here is a research-grade summary based on the latest reanalysis products and the OceanMind literature index.\n\nKey points:\n– Regional signal is strongest in the upper 50 m mixed layer.\n– Anomalies of +0.4 °C shift species envelopes poleward within one season.\n– Confidence: moderate-high (ensemble agreement 0.78).\n\nReferences: OceanMind Library, 3 matching studies.",
+          content: res.content,
+          source: res.source,
+          modelUsed: res.modelUsed,
         },
       ]);
-    }, 1400);
+    } catch (err: unknown) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Failed to fetch response from OpenRouter DeepSeek API: ${
+            err instanceof Error ? err.message : String(err)
+          }\n\nPlease check your VITE_OPENROUTER_API_KEY in .env or configure OpenRouter settings.`,
+          error: true,
+        },
+      ]);
+    } finally {
+      setTyping(false);
+    }
   }
 
   return (
     <div className="mx-auto grid max-w-7xl gap-6 px-4 pt-12 lg:grid-cols-[280px_minmax(0,1fr)]">
+      {/* Sidebar */}
       <aside className="glass hidden h-fit rounded-[2rem] p-5 lg:block">
-        <Button variant="ocean" className="w-full">
+        <Button
+          variant="ocean"
+          className="w-full"
+          onClick={() => setMessages([])}
+        >
           <Plus className="size-4" /> New chat
         </Button>
         <Section title="Recent Chats" items={["Tuna migration", "Red tide onset", "Reef bleaching"]} />
@@ -108,67 +185,136 @@ function MarineAI() {
         <Section title="Saved Notes" items={["Survey plan Q3", "Sampling checklist"]} icon={StickyNote} />
       </aside>
 
-      <section className="glass flex min-h-[70vh] flex-col rounded-[2rem] p-5">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[image:var(--gradient-ocean)] text-primary-foreground">
-              <Waves className="size-4" />
+      {/* Main Chat Container */}
+      <section className="glass flex min-h-[75vh] flex-col rounded-[2rem] p-5">
+        {/* Chat Top Header */}
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between border-b border-border/50 pb-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[image:var(--gradient-ocean)] text-primary-foreground shadow-[var(--shadow-glow)]">
+              <Waves className="size-5" />
             </span>
-            <h1 className="truncate text-lg font-semibold">Ocean Research Assistant</h1>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="truncate text-lg font-bold">Ocean Research Assistant</h1>
+                <Badge
+                  variant="outline"
+                  className={`text-xs ${
+                    hasApiKey
+                      ? "border-sea-green/40 bg-sea-green/10 text-sea-green"
+                      : "border-ocean-teal/40 bg-ocean-teal/10 text-ocean-cyan"
+                  }`}
+                >
+                  <Sparkles className="mr-1 size-3" />
+                  {hasApiKey ? "DeepSeek (Live)" : "DeepSeek Demo"}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Powered by OpenRouter DeepSeek Chat model
+              </p>
+            </div>
           </div>
-          <div className="flex shrink-0 gap-1">
-            <Button variant="ghost" size="icon" aria-label="Copy response">
+
+          <div className="flex shrink-0 items-center gap-2">
+            {/* DeepSeek Model Selector */}
+            <div className="hidden sm:block">
+              <Select value={selectedModel} onValueChange={handleModelChange}>
+                <SelectTrigger className="h-8 text-xs border-border/80 bg-secondary/40 w-44">
+                  <SelectValue placeholder="Model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {OPENROUTER_MODELS.map((m) => (
+                    <SelectItem key={m.id} value={m.id} className="text-xs">
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setOpenRouterModalOpen(true)}
+              className="h-8 text-xs border-border/80 rounded-xl"
+            >
+              <KeyRound className="size-3.5 text-ocean-cyan mr-1" /> Key Settings
+            </Button>
+
+            <Button variant="ghost" size="icon" aria-label="Copy response" title="Copy last response">
               <Copy className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Download PDF">
+            <Button variant="ghost" size="icon" aria-label="Download PDF" title="Export conversation">
               <Download className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Share">
+            <Button variant="ghost" size="icon" aria-label="Share" title="Share research">
               <Share2 className="size-4" />
             </Button>
           </div>
         </div>
 
-        <ScrollArea className="mt-5 flex-1">
-          <div className="space-y-6 pr-3">
+        {/* Message History */}
+        <ScrollArea className="mt-5 flex-1 pr-3">
+          <div className="space-y-6">
+            {messages.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Bot className="size-12 mx-auto text-ocean-cyan opacity-80 mb-3" />
+                <p className="font-semibold text-foreground">Welcome to OceanMind AI Marine Assistant</p>
+                <p className="text-xs mt-1">
+                  Ask any research question about oceanography, sea temperatures, marine biology, or climate change.
+                </p>
+              </div>
+            )}
             {messages.map((m, i) =>
               m.role === "user" ? (
                 <div key={i} className="flex justify-end">
-                  <p className="max-w-[85%] rounded-2xl bg-primary px-4 py-3 text-sm text-primary-foreground">
+                  <p className="max-w-[85%] rounded-2xl bg-[image:var(--gradient-ocean)] px-4 py-3 text-sm text-primary-foreground shadow-[var(--shadow-glow)]">
                     {m.content}
                   </p>
                 </div>
               ) : (
-                <div key={i} className="max-w-[92%] space-y-1">{renderContent(m.content)}</div>
+                <div
+                  key={i}
+                  className={`max-w-[92%] rounded-2xl p-4 border ${
+                    m.error
+                      ? "border-destructive/40 bg-destructive/10 text-destructive"
+                      : "border-border/60 bg-secondary/30 text-foreground"
+                  }`}
+                >
+                  {m.source && (
+                    <div className="flex items-center gap-1.5 text-[11px] text-ocean-cyan font-semibold mb-2">
+                      <Sparkles className="size-3" />
+                      <span>{m.source}</span>
+                      {m.modelUsed && <span className="opacity-70 font-mono">({m.modelUsed})</span>}
+                    </div>
+                  )}
+                  <div className="space-y-1">{renderContent(m.content)}</div>
+                </div>
               ),
             )}
             {typing && (
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                {[0, 1, 2].map((d) => (
-                  <span
-                    key={d}
-                    className="size-2 animate-pulse-glow rounded-full bg-ocean-cyan"
-                    style={{ animationDelay: `${d * 0.2}s` }}
-                  />
-                ))}
-                <span className="ml-2 text-xs">Analyzing ocean literature…</span>
+              <div className="flex items-center gap-2 text-muted-foreground p-3 rounded-2xl border border-border/40 bg-secondary/20 w-fit">
+                <Loader2 className="size-4 animate-spin text-ocean-cyan" />
+                <span className="text-xs">DeepSeek Chat model generating marine analysis…</span>
               </div>
             )}
           </div>
         </ScrollArea>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        {/* Suggested Prompts */}
+        <div className="mt-4 flex flex-wrap gap-2">
           {suggestedPrompts.map((p) => (
             <button
               key={p}
               onClick={() => send(p)}
-              className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-ocean-cyan/50 hover:text-foreground"
+              disabled={typing}
+              className="rounded-full border border-border/80 bg-secondary/30 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-ocean-cyan/60 hover:text-foreground disabled:opacity-50"
             >
               {p}
             </button>
           ))}
         </div>
 
+        {/* Text Input Area */}
         <div className="mt-4 rounded-2xl border border-border bg-secondary/40 p-3">
           <Textarea
             value={input}
@@ -179,27 +325,36 @@ function MarineAI() {
                 send(input);
               }
             }}
-            placeholder="Ask about species, currents, climate or upload ocean data…"
-            className="min-h-20 resize-none border-0 bg-transparent focus-visible:ring-0"
+            placeholder="Ask DeepSeek AI about species, currents, climate or upload ocean data…"
+            className="min-h-20 resize-none border-0 bg-transparent focus-visible:ring-0 text-sm"
           />
           <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
             <div className="flex gap-1">
-              <Button variant="ghost" size="icon" aria-label="Voice input">
+              <Button variant="ghost" size="icon" aria-label="Voice input" title="Voice input">
                 <Mic className="size-4" />
               </Button>
-              <Button variant="ghost" size="sm">
-                <FileUp className="size-4" /> PDF
+              <Button variant="ghost" size="sm" className="text-xs">
+                <FileUp className="size-3.5 mr-1" /> PDF
               </Button>
-              <Button variant="ghost" size="sm">
-                <FileUp className="size-4" /> Ocean data
+              <Button variant="ghost" size="sm" className="text-xs">
+                <FileUp className="size-3.5 mr-1" /> Ocean data
               </Button>
             </div>
-            <Button variant="ocean" size="icon" aria-label="Send" onClick={() => send(input)}>
+            <Button
+              variant="ocean"
+              size="icon"
+              disabled={typing || !input.trim()}
+              aria-label="Send"
+              onClick={() => send(input)}
+            >
               <Send className="size-4" />
             </Button>
           </div>
         </div>
       </section>
+
+      {/* OpenRouter Key Modal */}
+      <OpenRouterKeyModal open={openRouterModalOpen} onOpenChange={setOpenRouterModalOpen} />
     </div>
   );
 }
