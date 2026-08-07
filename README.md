@@ -1,14 +1,614 @@
-# Welcome to your Lovable project
+# OceanMind AI
+
+OceanMind AI – Intelligent Marine Research Platform
+
+Objective
+
+Build a modern, futuristic, responsive web application that helps marine researchers, fishermen, students, and ocean enthusiasts identify fish species, analyze ocean conditions, and interact with an AI marine research assistant.
+
+The UI should feel like a premium SaaS application with smooth animations, glassmorphism, ocean-themed colors, and professional dashboards.
+
+Technology Stack
+
+ React.js
+
+ TypeScript
+
+ Tailwind CSS
+
+ Framer Motion
+
+ React Router
+
+ React Query
+
+ Recharts
+
+ Lucide React Icons
+
+ Leaflet / Mapbox for maps
+
+ shadcn/ui components
+
+Design must be mobile responsive.
+
+Color Theme
+
+Primary Colors
+
+Deep Ocean Blue (#003B73)
+
+Ocean Cyan (#00A8E8)
+
+Teal (#00BFA6)
+
+Sea Green (#2ECC71)
+
+White (#F9FAFB)
+
+Background
+
+Dark navy gradient
+
+Glass cards
+
+Blur effects
+
+Soft shadows
+
+Rounded corners
+
+Gradient buttons
+
+Animated waves in hero section
+
+Landing Page
+
+Hero Section
+
+Large headline
+
+"AI-Powered Ocean Intelligence Platform"
+
+Subtitle
+
+Identify Fish Species, Explore Ocean Conditions, and Research Marine Ecosystems with Artificial Intelligence.
+
+Buttons
+
+ Upload Fish
+
+ Explore Ocean
+
+ Talk with Ocean AI
+
+Hero illustration
+
+3D globe
+
+Animated ocean
+
+Swimming fishes
+
+Floating particles
+
+Statistics Section
+
+Cards showing
+
+ Fish Species Supported
+
+ Ocean Regions
+
+ AI Accuracy
+
+ Research Articles
+
+Feature Cards
+
+Fish Recognition
+
+Ocean Dashboard
+
+Marine AI Assistant
+
+Research Database
+
+Satellite Ocean Maps
+
+Species Analytics
+
+Navigation Bar
+
+Logo
+
+OceanMind AI
+
+Menu
+
+ Home
+
+ Fish Identification
+
+ Ocean Dashboard
+
+ Marine AI
+
+ Research
+
+ About
+
+Right Side
+
+Dark Mode Toggle
+
+Profile
+
+Notifications
+
+Fish Identification Module
+
+Beautiful upload interface
+
+Drag & Drop
+
+Upload Image button
+
+Camera Capture
+
+Supported formats
+
+jpg
+
+png
+
+jpeg
+
+When image uploads
+
+Show loading animation
+
+Scanning fish...
+
+Identifying species...
+
+Analyzing morphology...
+
+After prediction
+
+Split Layout
+
+Left
+
+Uploaded image
+
+Zoom
+
+Compare Image
+
+Download Report
+
+Right
+
+Fish Information Card
+
+Scientific Name
+
+Common Name
+
+Family
+
+Habitat
+
+Diet
+
+Average Lifespan
+
+Average Size
+
+Danger Level
+
+Commercial Value
+
+IUCN Status
+
+Geographical Distribution
+
+Reproduction
+
+Migration Pattern
+
+Behavior
+
+Nutritional Information
+
+Fishing Season
+
+Predators
+
+Interesting Facts
+
+Confidence Score
+
+97.4%
+
+Species Comparison
+
+Similar fishes
+
+Probability bars
+
+Image Gallery
+
+Habitat Images
+
+Skeleton
+
+Distribution map
+
+Ocean Conditions Dashboard
+
+Professional dashboard
+
+Top Controls
+
+Latitude
+
+Longitude
+
+Search Ocean Region
+
+Date Picker
+
+Live Toggle
+
+Metrics Cards
+
+Sea Surface Temperature
+
+Salinity
+
+Ocean Depth
+
+Wave Height
+
+Current Speed
+
+Wind Speed
+
+Visibility
+
+Chlorophyll
+
+Dissolved Oxygen
+
+Pressure
+
+Interactive World Map
+
+Click any ocean
+
+Display conditions
+
+Charts
+
+Temperature Trend
+
+Salinity Graph
+
+Wave Height
+
+Current Speed
+
+Forecast
+
+24 Hours
+
+7 Days
+
+30 Days
+
+Ocean Alerts
+
+Storm
+
+Cyclone
+
+High Waves
+
+Unsafe Fishing
+
+Safe Zone Indicator
+
+Fish Habitat Prediction
+
+Map
+
+Probability Heatmap
+
+Suitable Habitat
+
+Migration Direction
+
+Season Prediction
+
+Temperature Suitability
+
+Ocean Research Assistant
+
+ChatGPT-style interface
+
+Large chat area
+
+Sidebar
+
+Recent Chats
+
+Pinned Research
+
+Saved Notes
+
+Suggested Questions
+
+Main Chat
+
+User Bubble
+
+AI Bubble
+
+Typing animation
+
+Markdown support
+
+Tables
+
+Code blocks
+
+Research references
+
+Example Prompts
+
+Explain El Niño.
+
+How do coral reefs respond to climate change?
+
+What fish species live near 20°C waters?
+
+How do ocean currents affect tuna migration?
+
+What causes red tides?
+
+Can sharks survive in freshwater?
+
+Top Actions
+
+Voice Input
+
+Upload PDF
+
+Upload Ocean Data
+
+Upload Research Papers
+
+Copy Response
+
+Download PDF
+
+Share
+
+Marine Research Library
+
+Search bar
+
+Filters
+
+Species
+
+Location
+
+Climate
+
+Ecosystem
+
+Research Cards
+
+Title
+
+Authors
+
+Summary
+
+Published Date
+
+Ocean Region
+
+Bookmark
+
+Analytics Dashboard
+
+Charts
+
+Fish Identification History
+
+Most Identified Species
+
+Ocean Temperature Trends
+
+Species Distribution
+
+Research Activity
+
+Pie Charts
+
+Area Charts
+
+Line Charts
+
+Heatmaps
+
+User Dashboard
+
+Profile
+
+Saved Fish
+
+Saved Research
+
+Downloads
+
+Bookmarks
+
+Recent Uploads
+
+Statistics
+
+Settings
+
+Language
+
+Theme
+
+Notifications
+
+API Keys
+
+Location Settings
+
+Measurement Units
+
+Footer
+
+About
+
+Privacy
+
+Terms
+
+API
+
+Contact
+
+GitHub
+
+Documentation
+
+Social Links
+
+Animations
+
+Smooth page transitions
+
+Glass hover effects
+
+Card lift animation
+
+Fish swimming background
+
+Ocean wave animation
+
+Gradient loading
+
+Skeleton loading
+
+AI typing indicator
+
+Parallax hero
+
+Map zoom animation
+
+Floating bubbles
+
+Responsive Design
+
+Desktop
+
+Tablet
+
+Mobile
+
+Collapsible sidebar
+
+Bottom navigation on mobile
+
+Touch-friendly controls
+
+Additional AI Features
+
+Fish Disease Detection
+
+Upload fish image
+
+Detect diseases
+
+Suggest treatments
+
+Fish Freshness Analyzer
+
+Estimate freshness
+
+Spoilage indicators
+
+Quality grade
+
+AI Recommendation Engine
+
+Suggest
+
+Best fishing locations
+
+Similar species
+
+Marine articles
+
+Ocean alerts
+
+Ocean Forecast
+
+Predict
+
+Wave conditions
+
+Temperature
+
+Currents
+
+Fishing suitability
+
+Marine Conservation
+
+Protected species alerts
+
+Illegal fishing warnings
+
+Endangered fish information
+
+Sustainability score
+
+Export Options
+
+Download
+
+PDF report
+
+CSV
+
+Excel
+
+Image summary
+
+Overall UI Style
+
+The application should resemble a premium AI SaaS product similar to ChatGPT, Notion AI, and Vercel Dashboard, combined with the visual quality of Apple and Stripe. Use a clean glassmorphism design with animated ocean-inspired backgrounds, smooth transitions, rich data visualizations, and highly polished, responsive layouts. The experience should feel modern, intuitive, and suitable for professional marine researchers as well as everyday users.
 
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/4fd61893-f05b-41d1-bcb4-305546296db9).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +620,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
