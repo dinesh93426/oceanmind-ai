@@ -4,34 +4,22 @@ import {
   Copy,
   Download,
   FileUp,
-  KeyRound,
   Loader2,
   Mic,
   Pin,
   Plus,
   Send,
   Share2,
-  Sparkles,
   StickyNote,
   Waves,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { OpenRouterKeyModal } from "@/components/ocean/OpenRouterKeyModal";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { suggestedPrompts } from "@/lib/ocean-data";
-import {
-  getOpenRouterApiKey,
-  getOpenRouterModel,
-  OPENROUTER_MODELS,
-  sendOpenRouterChatMessage,
-  setOpenRouterModel,
-  type OpenRouterMessage,
-} from "@/lib/openrouter-api";
+import { sendOpenRouterChatMessage, type OpenRouterMessage } from "@/lib/openrouter-api";
 
 export const Route = createFileRoute("/marine-ai")({
   head: () => ({
@@ -40,7 +28,7 @@ export const Route = createFileRoute("/marine-ai")({
       {
         name: "description",
         content:
-          "Ask OpenRouter DeepSeek AI marine research assistant about currents, coral reefs, species migration and blooms with scientific citations.",
+          "Ask OpenRouter DeepSeek AI marine research assistant about currents, coral reefs, species migration and oceanography.",
       },
       { property: "og:title", content: "Marine AI Research Assistant — OceanMind AI" },
       {
@@ -55,8 +43,6 @@ export const Route = createFileRoute("/marine-ai")({
 type Msg = {
   role: "user" | "assistant";
   content: string;
-  source?: string;
-  modelUsed?: string;
   error?: boolean;
 };
 
@@ -66,7 +52,6 @@ const seedMessages: Msg[] = [
     role: "assistant",
     content:
       "Tuna track thermal fronts rather than fixed routes. Western boundary currents such as the Kuroshio and Gulf Stream concentrate prey along sharp temperature gradients, so schools follow the 22–28 °C envelope as it shifts seasonally.\n\n| Driver | Effect on migration |\n| --- | --- |\n| Thermal fronts | Aggregation of prey and schooling |\n| Eddy fields | Localised feeding hotspots |\n| ENSO phase | Longitudinal displacement of stocks |\n\nReferences: Nakamura et al. 2026; Duarte & Mehta 2025.",
-    source: "DeepSeek V3 Chat",
   },
 ];
 
@@ -109,23 +94,6 @@ function MarineAI() {
   const [messages, setMessages] = useState<Msg[]>(seedMessages);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("deepseek/deepseek-chat");
-  const [openRouterModalOpen, setOpenRouterModalOpen] = useState(false);
-  const [hasApiKey, setHasApiKey] = useState(false);
-
-  useEffect(() => {
-    setHasApiKey(Boolean(getOpenRouterApiKey()));
-    setSelectedModel(getOpenRouterModel());
-
-    const handleKeyChange = () => setHasApiKey(Boolean(getOpenRouterApiKey()));
-    window.addEventListener("openrouter-key-changed", handleKeyChange);
-    return () => window.removeEventListener("openrouter-key-changed", handleKeyChange);
-  }, []);
-
-  const handleModelChange = (modelId: string) => {
-    setSelectedModel(modelId);
-    setOpenRouterModel(modelId);
-  };
 
   async function send(text: string) {
     const q = text.trim();
@@ -142,15 +110,13 @@ function MarineAI() {
         content: m.content,
       }));
 
-      const res = await sendOpenRouterChatMessage(historyPayload, selectedModel);
+      const res = await sendOpenRouterChatMessage(historyPayload);
 
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
           content: res.content,
-          source: res.source,
-          modelUsed: res.modelUsed,
         },
       ]);
     } catch (err: unknown) {
@@ -158,9 +124,7 @@ function MarineAI() {
         ...prev,
         {
           role: "assistant",
-          content: `Failed to fetch response from OpenRouter DeepSeek API: ${
-            err instanceof Error ? err.message : String(err)
-          }\n\nPlease check your VITE_OPENROUTER_API_KEY in .env or configure OpenRouter settings.`,
+          content: `Error from DeepSeek AI: ${err instanceof Error ? err.message : String(err)}`,
           error: true,
         },
       ]);
@@ -173,11 +137,7 @@ function MarineAI() {
     <div className="mx-auto grid max-w-7xl gap-6 px-4 pt-12 lg:grid-cols-[280px_minmax(0,1fr)]">
       {/* Sidebar */}
       <aside className="glass hidden h-fit rounded-[2rem] p-5 lg:block">
-        <Button
-          variant="ocean"
-          className="w-full"
-          onClick={() => setMessages([])}
-        >
+        <Button variant="ocean" className="w-full" onClick={() => setMessages([])}>
           <Plus className="size-4" /> New chat
         </Button>
         <Section title="Recent Chats" items={["Tuna migration", "Red tide onset", "Reef bleaching"]} />
@@ -187,59 +147,21 @@ function MarineAI() {
 
       {/* Main Chat Container */}
       <section className="glass flex min-h-[75vh] flex-col rounded-[2rem] p-5">
-        {/* Chat Top Header */}
+        {/* Clean Header */}
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between border-b border-border/50 pb-4">
           <div className="flex min-w-0 items-center gap-3">
             <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[image:var(--gradient-ocean)] text-primary-foreground shadow-[var(--shadow-glow)]">
               <Waves className="size-5" />
             </span>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="truncate text-lg font-bold">Ocean Research Assistant</h1>
-                <Badge
-                  variant="outline"
-                  className={`text-xs ${
-                    hasApiKey
-                      ? "border-sea-green/40 bg-sea-green/10 text-sea-green"
-                      : "border-ocean-teal/40 bg-ocean-teal/10 text-ocean-cyan"
-                  }`}
-                >
-                  <Sparkles className="mr-1 size-3" />
-                  {hasApiKey ? "DeepSeek (Live)" : "DeepSeek Demo"}
-                </Badge>
-              </div>
+              <h1 className="truncate text-lg font-bold">Ocean Research Assistant</h1>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Powered by OpenRouter DeepSeek Chat model
+                Powered by OpenRouter DeepSeek AI
               </p>
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
-            {/* DeepSeek Model Selector */}
-            <div className="hidden sm:block">
-              <Select value={selectedModel} onValueChange={handleModelChange}>
-                <SelectTrigger className="h-8 text-xs border-border/80 bg-secondary/40 w-44">
-                  <SelectValue placeholder="Model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {OPENROUTER_MODELS.map((m) => (
-                    <SelectItem key={m.id} value={m.id} className="text-xs">
-                      {m.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setOpenRouterModalOpen(true)}
-              className="h-8 text-xs border-border/80 rounded-xl"
-            >
-              <KeyRound className="size-3.5 text-ocean-cyan mr-1" /> Key Settings
-            </Button>
-
+          <div className="flex shrink-0 gap-1">
             <Button variant="ghost" size="icon" aria-label="Copy response" title="Copy last response">
               <Copy className="size-4" />
             </Button>
@@ -280,13 +202,6 @@ function MarineAI() {
                       : "border-border/60 bg-secondary/30 text-foreground"
                   }`}
                 >
-                  {m.source && (
-                    <div className="flex items-center gap-1.5 text-[11px] text-ocean-cyan font-semibold mb-2">
-                      <Sparkles className="size-3" />
-                      <span>{m.source}</span>
-                      {m.modelUsed && <span className="opacity-70 font-mono">({m.modelUsed})</span>}
-                    </div>
-                  )}
                   <div className="space-y-1">{renderContent(m.content)}</div>
                 </div>
               ),
@@ -294,7 +209,7 @@ function MarineAI() {
             {typing && (
               <div className="flex items-center gap-2 text-muted-foreground p-3 rounded-2xl border border-border/40 bg-secondary/20 w-fit">
                 <Loader2 className="size-4 animate-spin text-ocean-cyan" />
-                <span className="text-xs">DeepSeek Chat model generating marine analysis…</span>
+                <span className="text-xs">DeepSeek AI analyzing ocean data…</span>
               </div>
             )}
           </div>
@@ -352,9 +267,6 @@ function MarineAI() {
           </div>
         </div>
       </section>
-
-      {/* OpenRouter Key Modal */}
-      <OpenRouterKeyModal open={openRouterModalOpen} onOpenChange={setOpenRouterModalOpen} />
     </div>
   );
 }

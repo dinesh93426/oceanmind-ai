@@ -3,8 +3,6 @@ import { Bell, Fish, Menu, Moon, Sun, User, Waves, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { NoaaKeyModal } from "@/components/ocean/NoaaKeyModal";
-import { getNoaaApiKey } from "@/lib/noaa-api";
 
 const links = [
   { to: "/", label: "Home" },
@@ -19,19 +17,9 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const [light, setLight] = useState(false);
 
-  const [noaaModalOpen, setNoaaModalOpen] = useState(false);
-  const [hasNoaaKey, setHasNoaaKey] = useState(false);
-
   useEffect(() => {
     document.documentElement.classList.toggle("light", light);
   }, [light]);
-
-  useEffect(() => {
-    setHasNoaaKey(Boolean(getNoaaApiKey()));
-    const handleKeyChange = () => setHasNoaaKey(Boolean(getNoaaApiKey()));
-    window.addEventListener("noaa-key-changed", handleKeyChange);
-    return () => window.removeEventListener("noaa-key-changed", handleKeyChange);
-  }, []);
 
   return (
     <header className="sticky top-0 z-50">
@@ -57,23 +45,7 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setNoaaModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 border-sea-green/30 bg-sea-green/10 text-sea-green text-xs rounded-xl h-8 px-2.5 hover:bg-sea-green/20 transition-all"
-            title="Configure NOAA API Key for Ocean Conditions"
-          >
-            <Waves className="size-3.5" />
-            <span className="font-medium">NOAA API</span>
-            {hasNoaaKey ? (
-              <span className="size-2 rounded-full bg-sea-green animate-pulse" />
-            ) : (
-              <span className="text-[10px] opacity-75">(Demo)</span>
-            )}
-          </Button>
-
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setLight((v) => !v)}>
             {light ? <Moon className="size-4" /> : <Sun className="size-4" />}
           </Button>
@@ -97,12 +69,6 @@ export function Navbar() {
           </Button>
         </div>
       </div>
-
-      <NoaaKeyModal
-        open={noaaModalOpen}
-        onOpenChange={setNoaaModalOpen}
-        onKeyUpdated={() => setHasNoaaKey(Boolean(getNoaaApiKey()))}
-      />
 
       {open && (
         <div className="glass mx-3 mt-2 grid gap-1 rounded-2xl p-3 lg:hidden">

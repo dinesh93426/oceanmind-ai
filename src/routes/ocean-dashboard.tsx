@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, Globe, KeyRound, MapPin, Radio, RefreshCw, Search, ShieldCheck, Waves } from "lucide-react";
+import { AlertTriangle, Globe, MapPin, Radio, RefreshCw, Search, ShieldCheck, Waves } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Area,
@@ -13,7 +13,6 @@ import {
   YAxis,
 } from "recharts";
 
-import { NoaaKeyModal } from "@/components/ocean/NoaaKeyModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +21,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { oceanRegions } from "@/lib/ocean-data";
 import {
   fetchNoaaOceanConditions,
-  getNoaaApiKey,
   NOAA_STATIONS,
   searchNoaaStationsAndRegions,
   type NoaaOceanData,
@@ -36,12 +34,12 @@ export const Route = createFileRoute("/ocean-dashboard")({
       {
         name: "description",
         content:
-          "Live sea surface temperature, salinity, waves, currents and NOAA station observational alerts with NOAA API integration.",
+          "Live sea surface temperature, salinity, waves, currents and NOAA station observational alerts.",
       },
       { property: "og:title", content: "Ocean Conditions Dashboard — OceanMind AI" },
       {
         property: "og:description",
-        content: "Ten live marine metrics powered by NOAA API v2 (.env integrated) and real-time station observing buoys.",
+        content: "Ten live marine metrics powered by NOAA API and real-time station observing buoys.",
       },
     ],
   }),
@@ -62,7 +60,6 @@ function OceanDashboard() {
   const [regionQuery, setRegionQuery] = useState("");
   const [mapRegion, setMapRegion] = useState(oceanRegions[4]!);
   const [live, setLive] = useState(true);
-  const [noaaModalOpen, setNoaaModalOpen] = useState(false);
   const [noaaData, setNoaaData] = useState<NoaaOceanData | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchLat, setSearchLat] = useState("24.55");
@@ -100,18 +97,10 @@ function OceanDashboard() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 pt-12">
-      {/* Header */}
+      {/* Clean Header */}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:justify-between">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="truncate text-3xl font-bold sm:text-4xl">Ocean Conditions</h1>
-            <Badge
-              variant="outline"
-              className="border-sea-green/40 bg-sea-green/10 text-sea-green text-xs font-medium"
-            >
-              {noaaData?.source || "NOAA API v2 (.env)"}
-            </Badge>
-          </div>
+          <h1 className="truncate text-3xl font-bold sm:text-4xl">Ocean Conditions</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Station {activeStation.name} ({activeStation.id}) · {activeStation.region} ({activeStation.oceanBasin}) · updated{" "}
             {noaaData?.timestamp ? new Date(noaaData.timestamp).toLocaleTimeString() : "2 min ago"}
@@ -119,16 +108,6 @@ function OceanDashboard() {
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setNoaaModalOpen(true)}
-            className="flex items-center gap-1.5 border-sea-green/30 bg-sea-green/10 text-sea-green text-xs rounded-xl h-9 hover:bg-sea-green/20"
-          >
-            <KeyRound className="size-3.5" />
-            <span>NOAA API (.env)</span>
-          </Button>
-
           <Button
             variant="ghost"
             size="icon"
@@ -393,9 +372,6 @@ function OceanDashboard() {
           </span>
         </div>
       </div>
-
-      {/* NOAA Connection Modal */}
-      <NoaaKeyModal open={noaaModalOpen} onOpenChange={setNoaaModalOpen} />
     </div>
   );
 }
