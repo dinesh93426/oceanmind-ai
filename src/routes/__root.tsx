@@ -11,6 +11,11 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Footer } from "@/components/layout/Footer";
+import { MobileTabBar, Navbar } from "@/components/layout/Navbar";
+import { OceanBackground } from "@/components/ocean/OceanBackground";
+import { Toaster } from "@/components/ui/sonner";
+
 
 function NotFoundComponent() {
   return (
