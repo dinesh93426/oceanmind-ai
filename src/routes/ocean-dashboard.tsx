@@ -36,7 +36,7 @@ export const Route = createFileRoute("/ocean-dashboard")({
       },
     ],
   }),
-  component: OceanDashboard;
+  component: OceanDashboard,
 });
 
 const chartStyle = {
