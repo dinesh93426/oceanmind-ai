@@ -10,13 +10,13 @@ import { researchPapers } from "@/lib/ocean-data";
 export const Route = createFileRoute("/research")({
   head: () => ({
     meta: [
-      { title: "Marine Research Library — OceanMind AI" },
+      { title: "Marine Research Library — AquaIntel AI" },
       {
         name: "description",
         content:
           "Search and bookmark peer-reviewed marine science studies by species, location, climate and ecosystem.",
       },
-      { property: "og:title", content: "Marine Research Library — OceanMind AI" },
+      { property: "og:title", content: "Marine Research Library — AquaIntel AI" },
       {
         property: "og:description",
         content: "A curated, filterable index of ocean and fisheries research publications.",

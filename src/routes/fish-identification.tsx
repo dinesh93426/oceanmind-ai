@@ -24,13 +24,13 @@ import { identifiedFish, similarSpecies } from "@/lib/ocean-data";
 export const Route = createFileRoute("/fish-identification")({
   head: () => ({
     meta: [
-      { title: "Fish Identification — OceanMind AI" },
+      { title: "Fish Identification — AquaIntel AI" },
       {
         name: "description",
         content:
           "Upload or capture a fish photo and get species identification, morphology analysis, habitat maps and an export-ready report.",
       },
-      { property: "og:title", content: "Fish Identification — OceanMind AI" },
+      { property: "og:title", content: "Fish Identification — AquaIntel AI" },
       {
         property: "og:description",
         content: "AI fish species recognition with confidence scores, disease and freshness checks.",

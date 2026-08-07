@@ -24,13 +24,13 @@ import { sendOpenRouterChatMessage, type OpenRouterMessage } from "@/lib/openrou
 export const Route = createFileRoute("/marine-ai")({
   head: () => ({
     meta: [
-      { title: "Marine AI Research Assistant — OceanMind AI" },
+      { title: "Marine AI Research Assistant — AquaIntel AI" },
       {
         name: "description",
         content:
           "Ask AI marine research assistant about currents, coral reefs, species migration and oceanography.",
       },
-      { property: "og:title", content: "Marine AI Research Assistant — OceanMind AI" },
+      { property: "og:title", content: "Marine AI Research Assistant — AquaIntel AI" },
       {
         property: "og:description",
         content: "Research-grade ocean science chat assistant.",
@@ -204,7 +204,7 @@ function MarineAI() {
             <div>
               <h1 className="truncate text-lg font-bold">Ocean Research Assistant</h1>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Powered by OceanMind AI
+                Powered by AquaIntel AI
               </p>
             </div>
           </div>
@@ -228,7 +228,7 @@ function MarineAI() {
             {messages.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
                 <Bot className="size-12 mx-auto text-ocean-cyan opacity-80 mb-3" />
-                <p className="font-semibold text-foreground">Welcome to OceanMind AI Marine Assistant</p>
+                <p className="font-semibold text-foreground">Welcome to AquaIntel AI Marine Assistant</p>
                 <p className="text-xs mt-1">
                   Ask any research question about oceanography, sea temperatures, marine biology, or climate change.
                 </p>
@@ -257,7 +257,7 @@ function MarineAI() {
             {typing && (
               <div className="flex items-center gap-2 text-muted-foreground p-3 rounded-2xl border border-border/40 bg-secondary/20 w-fit">
                 <Loader2 className="size-4 animate-spin text-ocean-cyan" />
-                <span className="text-xs">DeepSeek AI analyzing ocean data…</span>
+                <span className="text-xs">Ocean Marine AI analyzing ocean data…</span>
               </div>
             )}
           </div>

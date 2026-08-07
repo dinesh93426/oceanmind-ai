@@ -82,14 +82,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "OceanMind AI — Intelligent Marine Research Platform" },
+      { title: "AquaIntel AI — Intelligent Marine Research Platform" },
       {
         name: "description",
         content:
           "AI-powered fish species identification, live ocean condition dashboards and a marine research assistant.",
       },
-      { name: "author", content: "OceanMind AI" },
-      { property: "og:title", content: "OceanMind AI — Intelligent Marine Research Platform" },
+      { name: "author", content: "AquaIntel AI" },
+      { property: "og:title", content: "AquaIntel AI — Intelligent Marine Research Platform" },
       {
         property: "og:description",
         content:

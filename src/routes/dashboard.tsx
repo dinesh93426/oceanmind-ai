@@ -36,13 +36,13 @@ import { identificationHistory, speciesDistribution, trend } from "@/lib/ocean-d
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Your Dashboard & Analytics — OceanMind AI" },
+      { title: "Your Dashboard & Analytics — AquaIntel AI" },
       {
         name: "description",
         content:
           "Track identification history, most identified species, temperature trends, saved research and account settings.",
       },
-      { property: "og:title", content: "Your Dashboard & Analytics — OceanMind AI" },
+      { property: "og:title", content: "Your Dashboard & Analytics — AquaIntel AI" },
       {
         property: "og:description",
         content: "Personal marine analytics: scans, species distribution, bookmarks and settings.",

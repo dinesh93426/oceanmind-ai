@@ -78,7 +78,7 @@ export async function sendOpenRouterChatMessage(
   const systemMessage: OpenRouterMessage = {
     role: "system",
     content:
-      "You are OceanMind AI Marine Research Assistant, an expert oceanographer, marine biologist, and climate scientist. Provide detailed, accurate, research-grade answers about ocean conditions, marine species, coral reef health, thermal currents, and oceanography. Format your response cleanly using Markdown, including headers, bullet points, lists, and scientific references where applicable.",
+      "You are AquaIntel AI Marine Research Assistant, an expert oceanographer, marine biologist, and climate scientist. Provide detailed, accurate, research-grade answers about ocean conditions, marine species, coral reef health, thermal currents, and oceanography. Format your response cleanly using Markdown, including headers, bullet points, lists, and scientific references where applicable.",
   };
 
   const payloadMessages = [systemMessage, ...history];
@@ -89,8 +89,8 @@ export async function sendOpenRouterChatMessage(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
-        "HTTP-Referer": typeof window !== "undefined" ? window.location.origin : "https://oceanmind.ai",
-        "X-Title": "OceanMind AI Marine Assistant",
+        "HTTP-Referer": typeof window !== "undefined" ? window.location.origin : "https://aquaintel.ai",
+        "X-Title": "AquaIntel AI Marine Assistant",
       },
       body: JSON.stringify({
         model: selectedModel,

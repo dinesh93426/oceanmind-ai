@@ -30,13 +30,13 @@ import {
 export const Route = createFileRoute("/ocean-dashboard")({
   head: () => ({
     meta: [
-      { title: "Ocean Conditions Dashboard — OceanMind AI" },
+      { title: "Ocean Conditions Dashboard — AquaIntel AI" },
       {
         name: "description",
         content:
           "Live sea surface temperature, salinity, waves, currents and NOAA station observational alerts.",
       },
-      { property: "og:title", content: "Ocean Conditions Dashboard — OceanMind AI" },
+      { property: "og:title", content: "Ocean Conditions Dashboard — AquaIntel AI" },
       {
         property: "og:description",
         content: "Ten live marine metrics powered by NOAA API and real-time station observing buoys.",

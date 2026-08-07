@@ -19,13 +19,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "OceanMind AI — AI-Powered Ocean Intelligence Platform" },
+      { title: "AquaIntel AI — AI-Powered Ocean Intelligence Platform" },
       {
         name: "description",
         content:
           "Identify fish species, explore live ocean conditions and research marine ecosystems with AI-powered ocean intelligence.",
       },
-      { property: "og:title", content: "OceanMind AI — AI-Powered Ocean Intelligence Platform" },
+      { property: "og:title", content: "AquaIntel AI — AI-Powered Ocean Intelligence Platform" },
       {
         property: "og:description",
         content:

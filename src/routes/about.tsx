@@ -4,13 +4,13 @@ import { Leaf, Radar, ShieldAlert, Sparkles } from "lucide-react";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About OceanMind AI — Marine Intelligence for Everyone" },
+      { title: "About AquaIntel AI — Marine Intelligence for Everyone" },
       {
         name: "description",
         content:
-          "OceanMind AI combines species recognition, ocean forecasting and conservation intelligence for researchers, fishers and students.",
+          "AquaIntel AI combines species recognition, ocean forecasting and conservation intelligence for researchers, fishers and students.",
       },
-      { property: "og:title", content: "About OceanMind AI" },
+      { property: "og:title", content: "About AquaIntel AI" },
       {
         property: "og:description",
         content: "Our mission, AI capabilities and conservation commitments.",
@@ -50,7 +50,7 @@ function About() {
         Marine intelligence, <span className="text-gradient-ocean">open to everyone</span>
       </h1>
       <p className="mt-5 max-w-2xl text-muted-foreground">
-        OceanMind AI was built with marine biologists, small-scale fishers and classroom educators.
+        AquaIntel AI was built with marine biologists, small-scale fishers and classroom educators.
         The same models that support peer-reviewed research power a one-tap species check on a boat
         with patchy signal.
       </p>

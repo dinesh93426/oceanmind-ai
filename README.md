@@ -1,6 +1,6 @@
-# OceanMind AI
+# AquaIntel AI
 
-OceanMind AI – Intelligent Marine Research Platform
+AquaIntel AI – Intelligent Marine Research Platform
 
 Objective
 

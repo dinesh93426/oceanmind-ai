@@ -28,7 +28,7 @@ export function Navbar() {
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[image:var(--gradient-ocean)] text-primary-foreground">
             <Waves className="size-5" />
           </span>
-          <span className="truncate font-display text-lg font-bold">OceanMind AI</span>
+          <span className="truncate font-display text-lg font-bold">AquaIntel AI</span>
         </Link>
 
         <nav className="ml-4 hidden flex-1 items-center gap-1 lg:flex">

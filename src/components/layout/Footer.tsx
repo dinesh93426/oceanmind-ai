@@ -17,7 +17,7 @@ export function Footer() {
             <span className="grid size-9 place-items-center rounded-xl bg-[image:var(--gradient-ocean)] text-primary-foreground">
               <Waves className="size-5" />
             </span>
-            <span className="font-display text-lg font-bold">OceanMind AI</span>
+            <span className="font-display text-lg font-bold">AquaIntel AI</span>
           </Link>
           <p className="mt-4 text-sm text-muted-foreground">
             Ocean intelligence for researchers, fishers and students — species recognition, live
@@ -45,7 +45,7 @@ export function Footer() {
         ))}
       </div>
       <p className="mx-auto mt-10 max-w-7xl px-4 text-xs text-muted-foreground">
-        © {new Date().getFullYear()} OceanMind AI. Demo data for illustration purposes.
+        © {new Date().getFullYear()} AquaIntel AI. Demo data for illustration purposes.
       </p>
     </footer>
   );
