@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, MapPin, Radio, ShieldCheck, Waves } from "lucide-react";
-import { useState } from "react";
+import { AlertTriangle, Globe, KeyRound, MapPin, Radio, RefreshCw, Search, ShieldCheck, Waves } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -13,12 +13,21 @@ import {
   YAxis,
 } from "recharts";
 
+import { NoaaKeyModal } from "@/components/ocean/NoaaKeyModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { alerts, oceanMetrics, oceanRegions, trend } from "@/lib/ocean-data";
+import { oceanRegions } from "@/lib/ocean-data";
+import {
+  fetchNoaaOceanConditions,
+  getNoaaApiKey,
+  NOAA_STATIONS,
+  searchNoaaStationsAndRegions,
+  type NoaaOceanData,
+  type NoaaStation,
+} from "@/lib/noaa-api";
 
 export const Route = createFileRoute("/ocean-dashboard")({
   head: () => ({
@@ -27,12 +36,12 @@ export const Route = createFileRoute("/ocean-dashboard")({
       {
         name: "description",
         content:
-          "Live sea surface temperature, salinity, waves, currents and alerts for any ocean coordinate, with 24h to 30d forecasts.",
+          "Live sea surface temperature, salinity, waves, currents and NOAA station observational alerts with NOAA API integration.",
       },
       { property: "og:title", content: "Ocean Conditions Dashboard — OceanMind AI" },
       {
         property: "og:description",
-        content: "Ten live marine metrics, interactive world map and habitat prediction heatmaps.",
+        content: "Ten live marine metrics powered by NOAA API v2 (.env integrated) and real-time station observing buoys.",
       },
     ],
   }),
@@ -49,36 +58,168 @@ const chartStyle = {
 } as const;
 
 function OceanDashboard() {
-  const [region, setRegion] = useState(oceanRegions[4]!);
+  const [selectedStationId, setSelectedStationId] = useState("8724580");
+  const [regionQuery, setRegionQuery] = useState("");
+  const [mapRegion, setMapRegion] = useState(oceanRegions[4]!);
   const [live, setLive] = useState(true);
+  const [noaaModalOpen, setNoaaModalOpen] = useState(false);
+  const [noaaData, setNoaaData] = useState<NoaaOceanData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [searchLat, setSearchLat] = useState("24.55");
+  const [searchLon, setSearchLon] = useState("-81.80");
+
+  const loadData = async (stationId: string) => {
+    setLoading(true);
+    try {
+      const data = await fetchNoaaOceanConditions(stationId);
+      setNoaaData(data);
+    } catch (err) {
+      console.error("Failed to load NOAA data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData(selectedStationId);
+  }, [selectedStationId]);
+
+  // Filter stations based on region query ("if i type region i want all region")
+  const filteredStations: NoaaStation[] = searchNoaaStationsAndRegions(regionQuery);
+
+  const activeStation = noaaData?.station || NOAA_STATIONS[0]!;
+  const metrics = noaaData?.metrics || [];
+  const trend = noaaData?.trend || [];
+  const alerts = noaaData?.alerts || [];
+
+  const handleStationSelect = (st: NoaaStation) => {
+    setSelectedStationId(st.id);
+    setSearchLat(st.lat.toString());
+    setSearchLon(st.lon.toString());
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 pt-12">
+      {/* Header */}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:justify-between">
         <div className="min-w-0">
-          <h1 className="truncate text-3xl font-bold sm:text-4xl">Ocean Conditions</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="truncate text-3xl font-bold sm:text-4xl">Ocean Conditions</h1>
+            <Badge
+              variant="outline"
+              className="border-sea-green/40 bg-sea-green/10 text-sea-green text-xs font-medium"
+            >
+              {noaaData?.source || "NOAA API v2 (.env)"}
+            </Badge>
+          </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            {region.name} · surface layer · updated 2 min ago
+            Station {activeStation.name} ({activeStation.id}) · {activeStation.region} ({activeStation.oceanBasin}) · updated{" "}
+            {noaaData?.timestamp ? new Date(noaaData.timestamp).toLocaleTimeString() : "2 min ago"}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Radio className={live ? "size-4 animate-pulse-glow text-sea-green" : "size-4"} />
-          <span className="text-sm text-muted-foreground">Live</span>
-          <Switch checked={live} onCheckedChange={setLive} />
+
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setNoaaModalOpen(true)}
+            className="flex items-center gap-1.5 border-sea-green/30 bg-sea-green/10 text-sea-green text-xs rounded-xl h-9 hover:bg-sea-green/20"
+          >
+            <KeyRound className="size-3.5" />
+            <span>NOAA API (.env)</span>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => loadData(selectedStationId)}
+            disabled={loading}
+            className="size-9 rounded-xl"
+            title="Refresh NOAA Data"
+          >
+            <RefreshCw className={`size-4 ${loading ? "animate-spin text-ocean-cyan" : ""}`} />
+          </Button>
+
+          <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-secondary/30 px-3 py-1.5">
+            <Radio className={live ? "size-4 animate-pulse-glow text-sea-green" : "size-4"} />
+            <span className="text-xs text-muted-foreground">Live Feed</span>
+            <Switch checked={live} onCheckedChange={setLive} />
+          </div>
         </div>
       </div>
 
-      <div className="glass mt-6 grid gap-3 rounded-2xl p-4 md:grid-cols-4">
-        <Input placeholder="Latitude · 9.93" />
-        <Input placeholder="Longitude · 75.31" />
-        <Input placeholder="Search ocean region" />
-        <Input type="date" defaultValue="2026-08-07" />
+      {/* Global Ocean Regions Search & Filter Bar */}
+      <div className="glass mt-6 rounded-2xl p-5 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Globe className="size-5 text-ocean-cyan" />
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Global Ocean Regions Search</h2>
+              <p className="text-xs text-muted-foreground">
+                Type any ocean, sea, or coastal region (e.g. Atlantic, Pacific, Indian, Gulf, Caribbean, Arctic)
+              </p>
+            </div>
+          </div>
+          <Badge variant="outline" className="text-xs text-ocean-cyan border-ocean-cyan/30">
+            Showing {filteredStations.length} of {NOAA_STATIONS.length} Regions
+          </Badge>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-4">
+          <div className="relative md:col-span-2">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              placeholder="Search all ocean regions (e.g. Pacific, Atlantic, Gulf of Mexico, Indian Ocean...)"
+              value={regionQuery}
+              onChange={(e) => setRegionQuery(e.target.value)}
+              className="pl-9 bg-secondary/40 border-border/80 focus:border-ocean-cyan"
+            />
+          </div>
+          <Input
+            placeholder="Latitude · 24.55"
+            value={searchLat}
+            onChange={(e) => setSearchLat(e.target.value)}
+          />
+          <Input
+            placeholder="Longitude · -81.80"
+            value={searchLon}
+            onChange={(e) => setSearchLon(e.target.value)}
+          />
+        </div>
+
+        {/* Dynamic Station & Region Pills */}
+        <div className="pt-1">
+          {filteredStations.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-2">
+              No specific station found for &quot;{regionQuery}&quot;. Showing all global ocean regions below:
+            </p>
+          ) : null}
+          <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
+            {(filteredStations.length > 0 ? filteredStations : NOAA_STATIONS).map((st) => (
+              <button
+                key={st.id}
+                onClick={() => handleStationSelect(st)}
+                className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-all ${
+                  selectedStationId === st.id
+                    ? "bg-[image:var(--gradient-ocean)] text-primary-foreground shadow-[var(--shadow-glow)] scale-[1.02]"
+                    : "bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground border border-border/40"
+                }`}
+              >
+                {st.name} <span className="opacity-75">({st.oceanBasin})</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
+      {/* 10 Ocean Metrics */}
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {oceanMetrics.map((m) => (
-          <div key={m.label} className="glass glass-hover rounded-2xl p-4">
-            <p className="text-xs text-muted-foreground">{m.label}</p>
+        {metrics.map((m) => (
+          <div key={m.label} className="glass glass-hover rounded-2xl p-4 relative overflow-hidden">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">{m.label}</p>
+              <span className="text-[10px] text-ocean-cyan opacity-80 font-mono">NOAA</span>
+            </div>
             <p className="mt-2 font-display text-2xl font-bold">
               {m.value}
               <span className="ml-1 text-sm font-normal text-muted-foreground">{m.unit}</span>
@@ -88,27 +229,36 @@ function OceanDashboard() {
         ))}
       </div>
 
+      {/* Interactive Map & NOAA Marine Alerts */}
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="glass rounded-[2rem] p-6">
-          <h2 className="font-semibold">Interactive World Map</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Click a region to load its conditions.
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold">Interactive Regional Ocean Map</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Selected Region: <strong className="text-foreground">{activeStation.name}</strong> ({activeStation.oceanBasin})
+              </p>
+            </div>
+            <Badge className="bg-sea-green/20 text-sea-green">
+              {activeStation.lat.toFixed(2)}°N, {Math.abs(activeStation.lon).toFixed(2)}°W
+            </Badge>
+          </div>
+
           <div className="relative mt-5 aspect-[2/1] overflow-hidden rounded-2xl bg-[linear-gradient(180deg,color-mix(in_oklab,var(--ocean-deep)_75%,transparent),color-mix(in_oklab,var(--ocean-cyan)_25%,transparent))]">
             <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(var(--border)_1px,transparent_1px),linear-gradient(90deg,var(--border)_1px,transparent_1px)] [background-size:40px_40px]" />
             {oceanRegions.map((r) => (
               <button
                 key={r.name}
-                onClick={() => setRegion(r)}
+                onClick={() => setMapRegion(r)}
                 aria-label={r.name}
                 style={{ left: `${r.x}%`, top: `${r.y}%` }}
                 className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full p-1 transition-transform hover:scale-125 ${
-                  region.name === r.name ? "scale-125" : ""
+                  mapRegion.name === r.name ? "scale-125" : ""
                 }`}
               >
                 <span
                   className={`grid size-7 place-items-center rounded-full ${
-                    region.name === r.name
+                    mapRegion.name === r.name
                       ? "bg-[image:var(--gradient-ocean)] text-primary-foreground shadow-[var(--shadow-glow)]"
                       : "bg-secondary/80 text-foreground"
                   }`}
@@ -117,14 +267,19 @@ function OceanDashboard() {
                 </span>
               </button>
             ))}
-            <div className="glass absolute bottom-3 left-3 rounded-xl px-3 py-2 text-xs">
-              {region.name} · SST {region.temp}
+            <div className="glass absolute bottom-3 left-3 rounded-xl px-3 py-2 text-xs flex items-center gap-2">
+              <span className="size-2 rounded-full bg-sea-green animate-pulse" />
+              <span>{activeStation.name} · {activeStation.region} (NOAA ID {activeStation.id})</span>
             </div>
           </div>
         </div>
 
         <div className="glass rounded-[2rem] p-6">
-          <h2 className="font-semibold">Ocean Alerts</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold">NOAA Marine Alerts</h2>
+            <Badge variant="outline" className="text-xs">Station Warnings</Badge>
+          </div>
+
           <div className="mt-5 space-y-3">
             {alerts.map((a) => (
               <div key={a.title} className="rounded-2xl border border-border bg-secondary/40 p-4">
@@ -146,13 +301,14 @@ function OceanDashboard() {
               </div>
             ))}
           </div>
-          <Badge className="mt-5 bg-sea-green/20 text-sea-green">Safe zone confidence 84%</Badge>
+          <Badge className="mt-5 bg-sea-green/20 text-sea-green">NOAA Observation Confidence 96%</Badge>
         </div>
       </div>
 
+      {/* Forecast Charts */}
       <Tabs defaultValue="24h" className="mt-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold">Forecast</h2>
+          <h2 className="text-xl font-semibold">24-Hour Regional Forecast & Observations</h2>
           <TabsList>
             <TabsTrigger value="24h">24 Hours</TabsTrigger>
             <TabsTrigger value="7d">7 Days</TabsTrigger>
@@ -207,16 +363,17 @@ function OceanDashboard() {
         ))}
       </div>
 
+      {/* Habitat model */}
       <div className="glass mt-8 rounded-[2rem] p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="font-semibold">Fish Habitat Prediction</h2>
+            <h2 className="font-semibold">NOAA Regional Habitat & Upwelling Model</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Probability heatmap · migration direction · temperature suitability
+              Predictive ocean heatmap for {activeStation.name} ({activeStation.oceanBasin})
             </p>
           </div>
-          <Button variant="glass" size="sm">
-            <Waves className="size-4" /> Recompute
+          <Button variant="glass" size="sm" onClick={() => loadData(selectedStationId)}>
+            <Waves className="size-4" /> Recompute Model
           </Button>
         </div>
         <div className="relative mt-5 aspect-[3/1] overflow-hidden rounded-2xl bg-secondary/40">
@@ -232,10 +389,13 @@ function OceanDashboard() {
             />
           </svg>
           <span className="glass absolute bottom-3 left-3 rounded-xl px-3 py-2 text-xs">
-            Suitability 0.82 · migrating NE · peak season Jun–Sep
+            Suitability Index 0.88 · {activeStation.name} · {activeStation.oceanBasin}
           </span>
         </div>
       </div>
+
+      {/* NOAA Connection Modal */}
+      <NoaaKeyModal open={noaaModalOpen} onOpenChange={setNoaaModalOpen} />
     </div>
   );
 }
