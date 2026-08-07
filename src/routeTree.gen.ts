@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as FishIdentificationRouteImport } from './routes/fish-identification'
 import { Route as MarineAiRouteImport } from './routes/marine-ai'
 import { Route as OceanDashboardRouteImport } from './routes/ocean-dashboard'
+import { Route as ResearchRouteImport } from './routes/research'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,25 @@ const OceanDashboardRoute = OceanDashboardRouteImport.update({
   path: '/ocean-dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResearchRoute = ResearchRouteImport.update({
+  id: '/research',
+  path: '/research',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/fish-identification': typeof FishIdentificationRoute
   '/marine-ai': typeof MarineAiRoute
   '/ocean-dashboard': typeof OceanDashboardRoute
+  '/research': typeof ResearchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/fish-identification': typeof FishIdentificationRoute
   '/marine-ai': typeof MarineAiRoute
   '/ocean-dashboard': typeof OceanDashboardRoute
+  '/research': typeof ResearchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,18 +61,30 @@ export interface FileRoutesById {
   '/fish-identification': typeof FishIdentificationRoute
   '/marine-ai': typeof MarineAiRoute
   '/ocean-dashboard': typeof OceanDashboardRoute
+  '/research': typeof ResearchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/fish-identification' | '/marine-ai' | '/ocean-dashboard'
+  fullPaths:
+    | '/'
+    | '/fish-identification'
+    | '/marine-ai'
+    | '/ocean-dashboard'
+    | '/research'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/fish-identification' | '/marine-ai' | '/ocean-dashboard'
+  to:
+    | '/'
+    | '/fish-identification'
+    | '/marine-ai'
+    | '/ocean-dashboard'
+    | '/research'
   id:
     | '__root__'
     | '/'
     | '/fish-identification'
     | '/marine-ai'
     | '/ocean-dashboard'
+    | '/research'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -72,6 +92,7 @@ export interface RootRouteChildren {
   FishIdentificationRoute: typeof FishIdentificationRoute
   MarineAiRoute: typeof MarineAiRoute
   OceanDashboardRoute: typeof OceanDashboardRoute
+  ResearchRoute: typeof ResearchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -104,6 +125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OceanDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/research': {
+      id: '/research'
+      path: '/research'
+      fullPath: '/research'
+      preLoaderRoute: typeof ResearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -112,6 +140,7 @@ const rootRouteChildren: RootRouteChildren = {
   FishIdentificationRoute: FishIdentificationRoute,
   MarineAiRoute: MarineAiRoute,
   OceanDashboardRoute: OceanDashboardRoute,
+  ResearchRoute: ResearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
