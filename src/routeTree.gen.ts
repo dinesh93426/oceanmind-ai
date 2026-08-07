@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FishIdentificationRouteImport } from './routes/fish-identification'
+import { Route as MarineAiRouteImport } from './routes/marine-ai'
 import { Route as OceanDashboardRouteImport } from './routes/ocean-dashboard'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const FishIdentificationRoute = FishIdentificationRouteImport.update({
   path: '/fish-identification',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarineAiRoute = MarineAiRouteImport.update({
+  id: '/marine-ai',
+  path: '/marine-ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OceanDashboardRoute = OceanDashboardRouteImport.update({
   id: '/ocean-dashboard',
   path: '/ocean-dashboard',
@@ -32,30 +38,39 @@ const OceanDashboardRoute = OceanDashboardRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/fish-identification': typeof FishIdentificationRoute
+  '/marine-ai': typeof MarineAiRoute
   '/ocean-dashboard': typeof OceanDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/fish-identification': typeof FishIdentificationRoute
+  '/marine-ai': typeof MarineAiRoute
   '/ocean-dashboard': typeof OceanDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/fish-identification': typeof FishIdentificationRoute
+  '/marine-ai': typeof MarineAiRoute
   '/ocean-dashboard': typeof OceanDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/fish-identification' | '/ocean-dashboard'
+  fullPaths: '/' | '/fish-identification' | '/marine-ai' | '/ocean-dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/fish-identification' | '/ocean-dashboard'
-  id: '__root__' | '/' | '/fish-identification' | '/ocean-dashboard'
+  to: '/' | '/fish-identification' | '/marine-ai' | '/ocean-dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/fish-identification'
+    | '/marine-ai'
+    | '/ocean-dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FishIdentificationRoute: typeof FishIdentificationRoute
+  MarineAiRoute: typeof MarineAiRoute
   OceanDashboardRoute: typeof OceanDashboardRoute
 }
 
@@ -75,6 +90,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FishIdentificationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marine-ai': {
+      id: '/marine-ai'
+      path: '/marine-ai'
+      fullPath: '/marine-ai'
+      preLoaderRoute: typeof MarineAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ocean-dashboard': {
       id: '/ocean-dashboard'
       path: '/ocean-dashboard'
@@ -88,6 +110,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FishIdentificationRoute: FishIdentificationRoute,
+  MarineAiRoute: MarineAiRoute,
   OceanDashboardRoute: OceanDashboardRoute,
 }
 export const routeTree = rootRouteImport
