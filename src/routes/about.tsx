@@ -58,7 +58,7 @@ function About() {
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
         {pillars.map((p) => (
           <div key={p.title} className="glass glass-hover rounded-2xl p-6">
-            <span className="grid size-11 place-items-center rounded-xl bg-[var(--gradient-ocean)] text-primary-foreground">
+            <span className="grid size-11 place-items-center rounded-xl bg-[image:var(--gradient-ocean)] text-primary-foreground">
               <p.icon className="size-5" />
             </span>
             <h2 className="mt-5 text-lg font-semibold">{p.title}</h2>

@@ -111,7 +111,7 @@ function MarineAI() {
       <section className="glass flex min-h-[70vh] flex-col rounded-[2rem] p-5">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
           <div className="flex min-w-0 items-center gap-2">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[var(--gradient-ocean)] text-primary-foreground">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[image:var(--gradient-ocean)] text-primary-foreground">
               <Waves className="size-4" />
             </span>
             <h1 className="truncate text-lg font-semibold">Ocean Research Assistant</h1>

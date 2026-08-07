@@ -74,7 +74,7 @@ function Dashboard() {
     <div className="mx-auto max-w-7xl px-4 pt-12">
       <div className="glass grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-[2rem] p-6 sm:flex sm:justify-between">
         <div className="flex min-w-0 items-center gap-4">
-          <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[var(--gradient-ocean)] text-primary-foreground">
+          <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[image:var(--gradient-ocean)] text-primary-foreground">
             <Fish className="size-6" />
           </span>
           <div className="min-w-0">

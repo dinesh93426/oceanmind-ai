@@ -177,7 +177,7 @@ function Landing() {
               transition={{ duration: 0.5, delay: (i % 3) * 0.08 }}
               className="glass glass-hover group rounded-2xl p-6"
             >
-              <span className="grid size-11 place-items-center rounded-xl bg-[var(--gradient-ocean)] text-primary-foreground">
+              <span className="grid size-11 place-items-center rounded-xl bg-[image:var(--gradient-ocean)] text-primary-foreground">
                 <f.icon className="size-5" />
               </span>
               <h3 className="mt-5 text-lg font-semibold">{f.title}</h3>

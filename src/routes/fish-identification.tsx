@@ -100,7 +100,7 @@ function FishIdentification() {
           }}
           className="glass mt-8 grid place-items-center rounded-[2rem] border-dashed px-6 py-20 text-center"
         >
-          <span className="grid size-16 place-items-center rounded-2xl bg-[var(--gradient-ocean)] text-primary-foreground">
+          <span className="grid size-16 place-items-center rounded-2xl bg-[image:var(--gradient-ocean)] text-primary-foreground">
             <Upload className="size-7" />
           </span>
           <p className="mt-6 text-lg font-semibold">Drop your fish image here</p>
@@ -212,7 +212,7 @@ function FishIdentification() {
                   <h2 className="text-2xl font-bold">{identifiedFish.common}</h2>
                   <p className="italic text-muted-foreground">{identifiedFish.scientific}</p>
                 </div>
-                <Badge className="bg-[var(--gradient-ocean)] text-primary-foreground">
+                <Badge className="bg-[image:var(--gradient-ocean)] text-primary-foreground">
                   {identifiedFish.confidence}% confidence
                 </Badge>
               </div>

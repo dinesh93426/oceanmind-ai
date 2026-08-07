@@ -25,7 +25,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50">
       <div className="glass mx-auto mt-3 flex max-w-7xl items-center gap-3 rounded-2xl px-4 py-3 sm:mx-4 lg:mx-auto">
         <Link to="/" className="flex min-w-0 items-center gap-2">
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[var(--gradient-ocean)] text-primary-foreground">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[image:var(--gradient-ocean)] text-primary-foreground">
             <Waves className="size-5" />
           </span>
           <span className="truncate font-display text-lg font-bold">OceanMind AI</span>

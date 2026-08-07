@@ -109,7 +109,7 @@ function OceanDashboard() {
                 <span
                   className={`grid size-7 place-items-center rounded-full ${
                     region.name === r.name
-                      ? "bg-[var(--gradient-ocean)] text-primary-foreground shadow-[var(--shadow-glow)]"
+                      ? "bg-[image:var(--gradient-ocean)] text-primary-foreground shadow-[var(--shadow-glow)]"
                       : "bg-secondary/80 text-foreground"
                   }`}
                 >

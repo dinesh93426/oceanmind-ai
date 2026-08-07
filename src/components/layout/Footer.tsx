@@ -14,7 +14,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
         <div className="max-w-sm">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid size-9 place-items-center rounded-xl bg-[var(--gradient-ocean)] text-primary-foreground">
+            <span className="grid size-9 place-items-center rounded-xl bg-[image:var(--gradient-ocean)] text-primary-foreground">
               <Waves className="size-5" />
             </span>
             <span className="font-display text-lg font-bold">OceanMind AI</span>
