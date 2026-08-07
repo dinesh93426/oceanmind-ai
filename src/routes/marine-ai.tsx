@@ -28,12 +28,12 @@ export const Route = createFileRoute("/marine-ai")({
       {
         name: "description",
         content:
-          "Ask OpenRouter DeepSeek AI marine research assistant about currents, coral reefs, species migration and oceanography.",
+          "Ask AI marine research assistant about currents, coral reefs, species migration and oceanography.",
       },
       { property: "og:title", content: "Marine AI Research Assistant — OceanMind AI" },
       {
         property: "og:description",
-        content: "Research-grade ocean science chat assistant powered by OpenRouter DeepSeek Chat model.",
+        content: "Research-grade ocean science chat assistant.",
       },
     ],
   }),
@@ -55,36 +55,84 @@ const seedMessages: Msg[] = [
   },
 ];
 
+function formatInlineMarkdown(text: string) {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={idx} className="font-semibold text-foreground">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
 function renderContent(text: string) {
   return text.split("\n").map((line, i) => {
-    if (line.startsWith("|")) {
-      const cells = line.split("|").filter((c) => c.trim());
-      const divider = cells.every((c) => /^[-\s]+$/.test(c));
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith("### ")) {
+      return (
+        <h4 key={i} className="mt-3 mb-1 text-sm font-bold text-ocean-cyan">
+          {formatInlineMarkdown(trimmed.replace(/^###\s+/, ""))}
+        </h4>
+      );
+    }
+
+    if (trimmed.startsWith("## ")) {
+      return (
+        <h3 key={i} className="mt-4 mb-2 text-base font-bold text-foreground">
+          {formatInlineMarkdown(trimmed.replace(/^##\s+/, ""))}
+        </h3>
+      );
+    }
+
+    if (trimmed.startsWith("# ")) {
+      return (
+        <h2 key={i} className="mt-4 mb-2 text-lg font-extrabold text-foreground">
+          {formatInlineMarkdown(trimmed.replace(/^#\s+/, ""))}
+        </h2>
+      );
+    }
+
+    if (trimmed.startsWith("|")) {
+      const cells = trimmed.split("|").filter((c) => c.trim());
+      const divider = cells.every((c) => /^[-\s:]+$/.test(c));
       if (divider) return null;
       return (
-        <div key={i} className="grid grid-cols-2 gap-2 border-b border-border py-2 text-sm">
+        <div key={i} className="grid grid-cols-2 gap-2 border-b border-border/60 py-1.5 text-xs sm:text-sm">
           {cells.map((c, j) => (
-            <span key={j} className={j === 0 ? "font-medium" : "text-muted-foreground"}>
-              {c.trim()}
+            <span key={j} className={j === 0 ? "font-semibold text-foreground" : "text-muted-foreground"}>
+              {formatInlineMarkdown(c.trim())}
             </span>
           ))}
         </div>
       );
     }
 
-    if (line.startsWith("- ") || line.startsWith("– ") || line.startsWith("* ")) {
+    if (/^[-–*]\s+/.test(trimmed)) {
       return (
-        <li key={i} className="ml-4 list-disc text-sm leading-relaxed text-foreground">
-          {line.replace(/^[-–*]\s+/, "")}
+        <li key={i} className="ml-4 list-disc text-sm leading-relaxed text-foreground/90">
+          {formatInlineMarkdown(trimmed.replace(/^[-–*]\s+/, ""))}
         </li>
       );
     }
 
-    if (!line.trim()) return <div key={i} className="h-2" />;
+    if (/^\d+\.\s+/.test(trimmed)) {
+      return (
+        <div key={i} className="ml-2 font-medium text-sm leading-relaxed text-foreground mt-1">
+          {formatInlineMarkdown(trimmed)}
+        </div>
+      );
+    }
+
+    if (!trimmed) return <div key={i} className="h-2" />;
 
     return (
-      <p key={i} className="text-sm leading-relaxed">
-        {line}
+      <p key={i} className="text-sm leading-relaxed text-foreground/90">
+        {formatInlineMarkdown(line)}
       </p>
     );
   });
@@ -156,7 +204,7 @@ function MarineAI() {
             <div>
               <h1 className="truncate text-lg font-bold">Ocean Research Assistant</h1>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Powered by OpenRouter DeepSeek AI
+                Powered by OceanMind AI
               </p>
             </div>
           </div>
