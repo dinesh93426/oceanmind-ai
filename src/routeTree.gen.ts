@@ -10,33 +10,115 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as FishIdentificationRouteImport } from './routes/fish-identification'
+import { Route as MarineAiRouteImport } from './routes/marine-ai'
+import { Route as OceanDashboardRouteImport } from './routes/ocean-dashboard'
+import { Route as ResearchRouteImport } from './routes/research'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FishIdentificationRoute = FishIdentificationRouteImport.update({
+  id: '/fish-identification',
+  path: '/fish-identification',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarineAiRoute = MarineAiRouteImport.update({
+  id: '/marine-ai',
+  path: '/marine-ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OceanDashboardRoute = OceanDashboardRouteImport.update({
+  id: '/ocean-dashboard',
+  path: '/ocean-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchRoute = ResearchRouteImport.update({
+  id: '/research',
+  path: '/research',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/dashboard': typeof DashboardRoute
+  '/fish-identification': typeof FishIdentificationRoute
+  '/marine-ai': typeof MarineAiRoute
+  '/ocean-dashboard': typeof OceanDashboardRoute
+  '/research': typeof ResearchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/dashboard': typeof DashboardRoute
+  '/fish-identification': typeof FishIdentificationRoute
+  '/marine-ai': typeof MarineAiRoute
+  '/ocean-dashboard': typeof OceanDashboardRoute
+  '/research': typeof ResearchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/dashboard': typeof DashboardRoute
+  '/fish-identification': typeof FishIdentificationRoute
+  '/marine-ai': typeof MarineAiRoute
+  '/ocean-dashboard': typeof OceanDashboardRoute
+  '/research': typeof ResearchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/dashboard'
+    | '/fish-identification'
+    | '/marine-ai'
+    | '/ocean-dashboard'
+    | '/research'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/dashboard'
+    | '/fish-identification'
+    | '/marine-ai'
+    | '/ocean-dashboard'
+    | '/research'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/dashboard'
+    | '/fish-identification'
+    | '/marine-ai'
+    | '/ocean-dashboard'
+    | '/research'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  DashboardRoute: typeof DashboardRoute
+  FishIdentificationRoute: typeof FishIdentificationRoute
+  MarineAiRoute: typeof MarineAiRoute
+  OceanDashboardRoute: typeof OceanDashboardRoute
+  ResearchRoute: typeof ResearchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,22 +130,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fish-identification': {
+      id: '/fish-identification'
+      path: '/fish-identification'
+      fullPath: '/fish-identification'
+      preLoaderRoute: typeof FishIdentificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marine-ai': {
+      id: '/marine-ai'
+      path: '/marine-ai'
+      fullPath: '/marine-ai'
+      preLoaderRoute: typeof MarineAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ocean-dashboard': {
+      id: '/ocean-dashboard'
+      path: '/ocean-dashboard'
+      fullPath: '/ocean-dashboard'
+      preLoaderRoute: typeof OceanDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research': {
+      id: '/research'
+      path: '/research'
+      fullPath: '/research'
+      preLoaderRoute: typeof ResearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  DashboardRoute: DashboardRoute,
+  FishIdentificationRoute: FishIdentificationRoute,
+  MarineAiRoute: MarineAiRoute,
+  OceanDashboardRoute: OceanDashboardRoute,
+  ResearchRoute: ResearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
