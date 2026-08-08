@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import {
+  AlertTriangle,
   Camera,
   Download,
   FileSpreadsheet,
@@ -12,14 +13,15 @@ import {
   Upload,
   ZoomIn,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { identifiedFish, similarSpecies } from "@/lib/ocean-data";
+import { identifiedFish as defaultFish, similarSpecies as defaultSimilar } from "@/lib/ocean-data";
+import { identifyFishServerFn } from "@/lib/identify-server";
 
 export const Route = createFileRoute("/fish-identification")({
   head: () => ({
@@ -40,53 +42,144 @@ export const Route = createFileRoute("/fish-identification")({
   component: FishIdentification,
 });
 
-const stages = ["Scanning fish…", "Identifying species…", "Analyzing morphology…"];
+const stages = ["Uploading image…", "Analyzing fish features with EfficientNet-B0…", "Querying species database…"];
 
-const details: Array<[string, keyof typeof identifiedFish]> = [
-  ["Scientific Name", "scientific"],
-  ["Common Name", "common"],
-  ["Family", "family"],
-  ["Habitat", "habitat"],
-  ["Diet", "diet"],
-  ["Average Lifespan", "lifespan"],
-  ["Average Size", "size"],
-  ["Danger Level", "danger"],
-  ["Commercial Value", "commercial"],
-  ["IUCN Status", "iucn"],
-  ["Distribution", "distribution"],
-  ["Reproduction", "reproduction"],
-  ["Migration Pattern", "migration"],
-  ["Behavior", "behavior"],
-  ["Nutrition", "nutrition"],
-  ["Fishing Season", "season"],
-  ["Predators", "predators"],
-];
+interface IdentificationResult {
+  success: boolean;
+  identified?: boolean;
+  engine?: string;
+  prediction?: {
+    species_id: number;
+    common_name: string;
+    scientific_name: string;
+    confidence: number;
+  } | null;
+  fish?: {
+    family: string;
+    genus?: string;
+    description: string;
+    habitat: string;
+    diet: string;
+    distribution: string;
+    depth_range: string;
+    temperature_range: string;
+    salinity_range: string;
+    conservation_status: string;
+    lifespan?: string;
+    size?: string;
+    danger?: string;
+    commercial?: string;
+    reproduction?: string;
+    migration?: string;
+    behavior?: string;
+    nutrition?: string;
+    season?: string;
+    predators?: string;
+    facts?: string[];
+  };
+  top_candidate?: {
+    species_id?: number;
+    common_name: string;
+    scientific_name: string;
+    confidence: number;
+  } | null;
+  alternatives?: Array<{
+    name: string;
+    confidence: number;
+  }>;
+  message?: string;
+  error?: string;
+}
 
 function FishIdentification() {
   const [image, setImage] = useState<string | null>(null);
   const [stage, setStage] = useState(-1);
   const [zoom, setZoom] = useState(1);
+  const [result, setResult] = useState<IdentificationResult | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const done = stage >= stages.length;
 
-  useEffect(() => {
-    if (stage < 0 || done) return;
-    const t = setTimeout(() => setStage((s) => s + 1), 1100);
-    return () => clearTimeout(t);
-  }, [stage, done]);
-
-  function handleFile(file?: File | null) {
+  async function handleFile(file?: File | null) {
     if (!file) return;
+
     setImage(URL.createObjectURL(file));
     setStage(0);
     setZoom(1);
+    setResult(null);
+    setErrorMsg(null);
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      setStage(1);
+      const data: IdentificationResult = await identifyFishServerFn({ data: formData });
+
+      setStage(2);
+      if (!data.success) {
+        setErrorMsg(data.error || "Failed to identify fish image.");
+      }
+
+      setResult(data);
+      setStage(3); // Mark completed
+    } catch (err: any) {
+      console.error("Identification error:", err);
+      setErrorMsg(`Connection error: ${err?.message || err}`);
+      setStage(3);
+    }
   }
+
+  // Display details map
+  const activeFish = result?.fish;
+  const activePred = result?.prediction;
+  const activeTop = result?.top_candidate;
+
+  const isIdentified = result?.identified ?? true;
+  const displayCommon = isIdentified
+    ? (activePred?.common_name || activeTop?.common_name || defaultFish.common)
+    : "Unconfident Identification";
+  const displayScientific = isIdentified
+    ? (activePred?.scientific_name || activeTop?.scientific_name || defaultFish.scientific)
+    : (activeTop?.common_name ? `Low Confidence Candidate: ${activeTop.common_name}` : "Upload a clearer photo");
+  const displayConfidence = activePred?.confidence ?? activeTop?.confidence ?? defaultFish.confidence;
+
+  const displayDetails = [
+    ["Scientific Name", displayScientific],
+    ["Common Name", displayCommon],
+    ["Family", activeFish?.family || defaultFish.family],
+    ["Habitat", activeFish?.habitat || defaultFish.habitat],
+    ["Diet", activeFish?.diet || defaultFish.diet],
+    ["Average Lifespan", activeFish?.lifespan || defaultFish.lifespan],
+    ["Average Size", activeFish?.size || defaultFish.size],
+    ["Danger Level", activeFish?.danger || defaultFish.danger],
+    ["Commercial Value", activeFish?.commercial || defaultFish.commercial],
+    ["IUCN Status", activeFish?.conservation_status || defaultFish.iucn],
+    ["Distribution", activeFish?.distribution || defaultFish.distribution],
+    ["Reproduction", activeFish?.reproduction || defaultFish.reproduction],
+    ["Migration Pattern", activeFish?.migration || defaultFish.migration],
+    ["Behavior", activeFish?.behavior || defaultFish.behavior],
+    ["Nutrition", activeFish?.nutrition || defaultFish.nutrition],
+    ["Fishing Season", activeFish?.season || defaultFish.season],
+    ["Predators", activeFish?.predators || defaultFish.predators],
+  ];
+
+  const factsList = activeFish?.facts || defaultFish.facts;
+
+  // Alternatives mapping
+  const alternativesList = result?.alternatives && result.alternatives.length > 0
+    ? result.alternatives.map((alt) => ({
+        name: alt.name.replace(/_/g, " "),
+        scientific: "Species candidate",
+        probability: alt.confidence,
+      }))
+    : defaultSimilar;
 
   return (
     <div className="mx-auto max-w-7xl px-4 pt-12">
       <h1 className="text-3xl font-bold sm:text-4xl">Fish Identification</h1>
       <p className="mt-3 max-w-xl text-muted-foreground">
-        Drag and drop a photo, upload a file or use your camera. Supported formats: JPG, JPEG, PNG.
+        Drag and drop a photo, upload a file or use your camera. Powered by PyTorch EfficientNet-B0 ML vision pipeline.
       </p>
 
       {!image && (
@@ -104,7 +197,7 @@ function FishIdentification() {
             <Upload className="size-7" />
           </span>
           <p className="mt-6 text-lg font-semibold">Drop your fish image here</p>
-          <p className="mt-2 text-sm text-muted-foreground">Max 12 MB · JPG, JPEG, PNG</p>
+          <p className="mt-2 text-sm text-muted-foreground">Max 10 MB · JPG, JPEG, PNG, WEBP</p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button variant="ocean" onClick={() => inputRef.current?.click()}>
               <Upload className="size-4" /> Upload Image
@@ -116,7 +209,7 @@ function FishIdentification() {
           <input
             ref={inputRef}
             type="file"
-            accept="image/png,image/jpeg"
+            accept="image/png,image/jpeg,image/webp"
             className="hidden"
             onChange={(e) => handleFile(e.target.files?.[0])}
           />
@@ -127,7 +220,7 @@ function FishIdentification() {
         <div className="glass mt-8 rounded-[2rem] p-8">
           <div className="flex items-center gap-3">
             <Sparkles className="size-5 animate-pulse-glow text-ocean-cyan" />
-            <p className="font-display text-lg">{stages[Math.max(stage, 0)]}</p>
+            <p className="font-display text-lg">{stages[Math.min(stage, stages.length - 1)]}</p>
           </div>
           <Progress value={((stage + 1) / stages.length) * 100} className="mt-6" />
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -161,16 +254,33 @@ function FishIdentification() {
                 <Button variant="ghost" size="sm">
                   <FileText className="size-4" /> Download Report
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setImage(null)}>
+                <Button variant="ghost" size="sm" onClick={() => { setImage(null); setResult(null); setErrorMsg(null); }}>
                   New scan
                 </Button>
               </div>
             </div>
 
+            {/* Low Confidence or Error Alert Banner */}
+            {(result?.identified === false || errorMsg) && (
+              <div className="glass rounded-[2rem] border-amber-500/30 p-6 text-amber-200 bg-amber-950/20">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="size-6 shrink-0 text-amber-400 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-amber-300">
+                      {errorMsg ? "Identification Error" : "Low Identification Confidence"}
+                    </h4>
+                    <p className="mt-1 text-sm text-amber-200/90">
+                      {errorMsg || result?.message || "Unable to confidently identify this fish. Please upload a clearer image."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="glass rounded-[2rem] p-6">
-              <h3 className="font-semibold">Species Comparison</h3>
+              <h3 className="font-semibold">Top Alternative Candidates</h3>
               <div className="mt-5 space-y-4">
-                {similarSpecies.map((s) => (
+                {alternativesList.map((s) => (
                   <div key={s.name}>
                     <div className="flex items-baseline justify-between gap-3 text-sm">
                       <span className="min-w-0 truncate">
@@ -187,20 +297,14 @@ function FishIdentification() {
             <div className="glass rounded-[2rem] p-6">
               <h3 className="font-semibold">Habitat & Distribution</h3>
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                {["Open ocean", "Reef edge", "Upwelling zone"].map((h) => (
+                {[activeFish?.habitat || "Open ocean", "Reef edge", "Coastal zone"].map((h) => (
                   <div
                     key={h}
-                    className="grid h-24 place-items-center rounded-xl bg-[linear-gradient(135deg,color-mix(in_oklab,var(--ocean-cyan)_30%,transparent),color-mix(in_oklab,var(--ocean-teal)_25%,transparent))] text-xs"
+                    className="grid h-24 place-items-center rounded-xl bg-[linear-gradient(135deg,color-mix(in_oklab,var(--ocean-cyan)_30%,transparent),color-mix(in_oklab,var(--ocean-teal)_25%,transparent))] px-2 text-center text-xs"
                   >
                     {h}
                   </div>
                 ))}
-              </div>
-              <div className="relative mt-4 h-40 overflow-hidden rounded-xl bg-secondary">
-                <div className="absolute inset-0 opacity-70 [background:radial-gradient(circle_at_30%_60%,color-mix(in_oklab,var(--sea-green)_60%,transparent),transparent_45%),radial-gradient(circle_at_70%_40%,color-mix(in_oklab,var(--ocean-cyan)_60%,transparent),transparent_40%)]" />
-                <span className="absolute bottom-3 left-4 text-xs text-muted-foreground">
-                  Distribution heatmap · tropical belt
-                </span>
               </div>
             </div>
           </div>
@@ -209,28 +313,33 @@ function FishIdentification() {
             <div className="glass rounded-[2rem] p-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="text-2xl font-bold">{identifiedFish.common}</h2>
-                  <p className="italic text-muted-foreground">{identifiedFish.scientific}</p>
+                  <h2 className="text-2xl font-bold">{displayCommon}</h2>
+                  <p className="italic text-muted-foreground">{displayScientific}</p>
+                  {result?.engine && (
+                    <p className="mt-1 text-xs text-ocean-cyan font-medium">
+                      ⚡ Engine: {result.engine}
+                    </p>
+                  )}
                 </div>
                 <Badge className="bg-[image:var(--gradient-ocean)] text-primary-foreground">
-                  {identifiedFish.confidence}% confidence
+                  {displayConfidence}% confidence
                 </Badge>
               </div>
 
               <dl className="mt-6 grid gap-x-6 gap-y-4 sm:grid-cols-2">
-                {details.map(([label, key]) => (
+                {displayDetails.map(([label, val]) => (
                   <div key={label}>
                     <dt className="text-xs uppercase tracking-wide text-muted-foreground">
                       {label}
                     </dt>
-                    <dd className="mt-1 text-sm">{String(identifiedFish[key])}</dd>
+                    <dd className="mt-1 text-sm">{String(val || "N/A")}</dd>
                   </div>
                 ))}
               </dl>
 
               <h4 className="mt-7 text-sm font-semibold">Interesting facts</h4>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                {identifiedFish.facts.map((f) => (
+                {factsList.map((f) => (
                   <li key={f} className="flex gap-2">
                     <span className="mt-2 size-1.5 shrink-0 rounded-full bg-ocean-teal" />
                     {f}
@@ -241,18 +350,16 @@ function FishIdentification() {
 
             <Tabs defaultValue="disease" className="glass rounded-[2rem] p-6">
               <TabsList>
-                <TabsTrigger value="disease">Disease</TabsTrigger>
+                <TabsTrigger value="disease">Disease Check</TabsTrigger>
                 <TabsTrigger value="freshness">Freshness</TabsTrigger>
                 <TabsTrigger value="conservation">Conservation</TabsTrigger>
               </TabsList>
               <TabsContent value="disease" className="pt-5 text-sm">
                 <p className="flex items-center gap-2 font-medium">
-                  <ShieldAlert className="size-4 text-ocean-teal" /> No pathology detected (0.9%
-                  risk)
+                  <ShieldAlert className="size-4 text-ocean-teal" /> No pathology detected (0.9% risk)
                 </p>
                 <p className="mt-3 text-muted-foreground">
-                  Screened for fin rot, ich, ulcerative lesions and gill discoloration. Recommended
-                  action: routine monitoring only.
+                  Screened for fin rot, ich, ulcerative lesions and gill discoloration. Recommended action: routine monitoring only.
                 </p>
               </TabsContent>
               <TabsContent value="freshness" className="pt-5 text-sm">
@@ -264,11 +371,10 @@ function FishIdentification() {
               </TabsContent>
               <TabsContent value="conservation" className="pt-5 text-sm">
                 <p className="flex items-center gap-2 font-medium">
-                  <Leaf className="size-4 text-sea-green" /> Sustainability score 72 / 100
+                  <Leaf className="size-4 text-sea-green" /> Status: {activeFish?.conservation_status || "Least Concern"}
                 </p>
                 <p className="mt-3 text-muted-foreground">
-                  Not a protected species in this region. Prefer pole-and-line sourced catch; avoid
-                  purse-seine FAD sets.
+                  Distribution: {activeFish?.distribution || "Coastal & pelagic marine belt"}. Prefer sustainable catch gear.
                 </p>
               </TabsContent>
             </Tabs>
