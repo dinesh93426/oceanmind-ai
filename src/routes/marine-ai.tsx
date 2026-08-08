@@ -202,7 +202,7 @@ function MarineAI() {
               <Waves className="size-5" />
             </span>
             <div>
-              <h1 className="truncate text-lg font-bold">Ocean Research Assistant</h1>
+              <h1 className="truncate text-lg font-bold">AquaIntel Intelligence Assistant</h1>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Powered by AquaIntel AI
               </p>
@@ -257,7 +257,7 @@ function MarineAI() {
             {typing && (
               <div className="flex items-center gap-2 text-muted-foreground p-3 rounded-2xl border border-border/40 bg-secondary/20 w-fit">
                 <Loader2 className="size-4 animate-spin text-ocean-cyan" />
-                <span className="text-xs">Ocean Marine AI analyzing ocean data…</span>
+                <span className="text-xs">AquaIntel AI analyzing ocean data…</span>
               </div>
             )}
           </div>
@@ -288,7 +288,7 @@ function MarineAI() {
                 send(input);
               }
             }}
-            placeholder="Ask DeepSeek AI about species, currents, climate or upload ocean data…"
+            placeholder="Ask AquaIntel AI about species, currents, climate or upload ocean data…"
             className="min-h-20 resize-none border-0 bg-transparent focus-visible:ring-0 text-sm"
           />
           <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
