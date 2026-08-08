@@ -202,7 +202,7 @@ function MarineAI() {
               <Waves className="size-5" />
             </span>
             <div>
-              <h1 className="truncate text-lg font-bold">AquaIntel Intelligence Assistant</h1>
+              <h1 className="truncate text-lg font-bold">AquaIntel AI - Marine Assistant</h1>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Powered by AquaIntel AI
               </p>
