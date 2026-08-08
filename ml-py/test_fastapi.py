@@ -31,7 +31,14 @@ def test_fastapi_endpoints():
     assert res_health.status_code == 200
     assert res_health.json()["status"] == "ok"
     assert res_health.json()["service"] == "mlpyserver"
-    print("--> PASSED /health check!\n")
+    print("--> PASSED /health GET check!\n")
+
+    # 1b. Test HEAD /health
+    print("[1b] Testing HEAD /health...")
+    res_head = client.head("/health")
+    print(f"Status Code: {res_head.status_code}")
+    assert res_head.status_code == 200
+    print("--> PASSED /health HEAD check!\n")
 
     # 2. Create a synthetic test image in memory
     img = Image.new("RGB", (300, 300), color=(100, 150, 200))

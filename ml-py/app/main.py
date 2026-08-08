@@ -77,6 +77,11 @@ def health_check():
         "service": "mlpyserver"
     }
 
+@app.head("/health", tags=["Health"])
+def health_check_head():
+    """Head request handler for health check."""
+    return
+
 @app.post("/predict", tags=["Prediction"])
 async def predict_fish_species(image: UploadFile = File(...)):
     """
