@@ -71,20 +71,11 @@ def root_endpoint():
 
 @app.get("/health", tags=["Health"])
 def health_check():
-    """Health check endpoint required by Step 15."""
-    try:
-        predictor = get_predictor()
-        is_loaded = predictor.model is not None and predictor.num_classes > 0
-        return {
-            "status": "healthy" if is_loaded else "unhealthy",
-            "model_loaded": is_loaded,
-            "num_classes": predictor.num_classes
-        }
-    except Exception as e:
-        return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={"status": "unhealthy", "model_loaded": False, "error": str(e)}
-        )
+    """Lightweight health check endpoint for keeping server awake."""
+    return {
+        "status": "ok",
+        "service": "mlpyserver"
+    }
 
 @app.post("/predict", tags=["Prediction"])
 async def predict_fish_species(image: UploadFile = File(...)):

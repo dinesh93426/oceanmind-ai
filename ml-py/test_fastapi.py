@@ -29,8 +29,8 @@ def test_fastapi_endpoints():
     print(f"Status Code: {res_health.status_code}")
     print(f"Response: {res_health.json()}")
     assert res_health.status_code == 200
-    assert res_health.json()["status"] == "healthy"
-    assert res_health.json()["model_loaded"] is True
+    assert res_health.json()["status"] == "ok"
+    assert res_health.json()["service"] == "mlpyserver"
     print("--> PASSED /health check!\n")
 
     # 2. Create a synthetic test image in memory
