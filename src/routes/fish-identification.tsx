@@ -179,7 +179,7 @@ function FishIdentification() {
     <div className="mx-auto max-w-7xl px-4 pt-12">
       <h1 className="text-3xl font-bold sm:text-4xl">Fish Identification</h1>
       <p className="mt-3 max-w-xl text-muted-foreground">
-        Drag and drop a photo, upload a file or use your camera. Powered by PyTorch EfficientNet-B0 ML vision pipeline.
+        Drag and drop a photo, upload a file or use your camera.
       </p>
 
       {!image && (
