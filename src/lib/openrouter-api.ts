@@ -16,7 +16,6 @@ export type OpenRouterResponse = {
 
 const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 const STORAGE_KEY = "oceanmind_openrouter_api_key";
-const DEFAULT_OPENROUTER_KEY = "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";
 
 export const OPENROUTER_MODELS = [
   { id: "deepseek/deepseek-chat", name: "DeepSeek V3 Chat", provider: "DeepSeek" },
@@ -24,10 +23,13 @@ export const OPENROUTER_MODELS = [
 ];
 
 /**
- * Retrieve OpenRouter API Key from .env, localStorage, or configured default key
+ * Retrieve OpenRouter API Key from .env or localStorage
  */
 export function getOpenRouterApiKey(): string {
-  const envKey = import.meta.env["VITE_OPENROUTER_API_KEY"];
+  const envKey =
+    (typeof import.meta !== "undefined" && import.meta.env ? import.meta.env["VITE_OPENROUTER_API_KEY"] : undefined) ||
+    (typeof process !== "undefined" && process.env ? process.env["VITE_OPENROUTER_API_KEY"] : undefined);
+
   if (typeof envKey === "string" && envKey.trim().length > 0) {
     return envKey.trim();
   }
@@ -35,7 +37,7 @@ export function getOpenRouterApiKey(): string {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved && saved.trim().length > 0) return saved.trim();
   }
-  return DEFAULT_OPENROUTER_KEY;
+  return "";
 }
 
 /**
