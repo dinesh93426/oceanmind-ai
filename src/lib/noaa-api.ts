@@ -28,7 +28,7 @@ export type NoaaOceanData = {
   station: NoaaStation;
   metrics: NoaaMetric[];
   trend: Array<{
-    hour: string;
+    time: string;
     temperature: number;
     salinity: number;
     wave: number;
@@ -303,6 +303,7 @@ export function searchNoaaStationsAndRegions(query: string): NoaaStation[] {
  */
 export async function fetchNoaaOceanConditions(
   stationId: string = "8724580",
+  timeRange: "24h" | "7d" | "30d" = "24h"
 ): Promise<NoaaOceanData> {
   const station = NOAA_STATIONS.find((s) => s.id === stationId) || NOAA_STATIONS[0]!;
   const apiKey = getNoaaApiKey();
@@ -388,13 +389,27 @@ export async function fetchNoaaOceanConditions(
     { label: "Dissolved O₂", value: calculatedO2, unit: "mg/L", delta: "-0.1" },
   ];
 
-  const trend = Array.from({ length: 24 }, (_, h) => {
-    const hourStr = `${String(h).padStart(2, "0")}:00`;
-    const t = +(baseTemp + Math.sin(h / 3.5) * 1.2).toFixed(2);
-    const s = +(parseFloat(calculatedSalinity) + Math.cos(h / 4) * 0.2).toFixed(2);
-    const w = +(parseFloat(calculatedWave) + Math.sin(h / 2.5) * 0.4).toFixed(2);
-    const c = +(parseFloat(calculatedCurrent) + Math.cos(h / 5) * 0.15).toFixed(2);
-    return { hour: hourStr, temperature: t, salinity: s, wave: w, current: c };
+  const dataPoints = timeRange === "24h" ? 24 : timeRange === "7d" ? 7 : 30;
+  
+  const trend = Array.from({ length: dataPoints }, (_, i) => {
+    let timeLabel = "";
+    if (timeRange === "24h") {
+      timeLabel = `${String(i).padStart(2, "0")}:00`;
+    } else if (timeRange === "7d") {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      timeLabel = d.toLocaleDateString("en-US", { weekday: "short" });
+    } else {
+      const d = new Date();
+      d.setDate(d.getDate() - (29 - i));
+      timeLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    }
+
+    const t = +(baseTemp + Math.sin(i / (timeRange === "24h" ? 3.5 : 2)) * 1.2).toFixed(2);
+    const s = +(parseFloat(calculatedSalinity) + Math.cos(i / (timeRange === "24h" ? 4 : 2)) * 0.2).toFixed(2);
+    const w = +(parseFloat(calculatedWave) + Math.sin(i / (timeRange === "24h" ? 2.5 : 1.5)) * 0.4).toFixed(2);
+    const c = +(parseFloat(calculatedCurrent) + Math.cos(i / (timeRange === "24h" ? 5 : 2)) * 0.15).toFixed(2);
+    return { time: timeLabel, temperature: t, salinity: s, wave: w, current: c };
   });
 
   const alerts: NoaaOceanData["alerts"] = [

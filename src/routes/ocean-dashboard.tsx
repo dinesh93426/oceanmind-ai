@@ -61,14 +61,15 @@ function OceanDashboard() {
   const [mapRegion, setMapRegion] = useState(oceanRegions[4]!);
   const [live, setLive] = useState(true);
   const [noaaData, setNoaaData] = useState<NoaaOceanData | null>(null);
+  const [timeRange, setTimeRange] = useState<"24h" | "7d" | "30d">("24h");
   const [loading, setLoading] = useState(false);
   const [searchLat, setSearchLat] = useState("24.55");
   const [searchLon, setSearchLon] = useState("-81.80");
 
-  const loadData = async (stationId: string) => {
+  const loadData = async (stationId: string, range: "24h" | "7d" | "30d") => {
     setLoading(true);
     try {
-      const data = await fetchNoaaOceanConditions(stationId);
+      const data = await fetchNoaaOceanConditions(stationId, range);
       setNoaaData(data);
     } catch (err) {
       console.error("Failed to load NOAA data:", err);
@@ -78,8 +79,8 @@ function OceanDashboard() {
   };
 
   useEffect(() => {
-    loadData(selectedStationId);
-  }, [selectedStationId]);
+    loadData(selectedStationId, timeRange);
+  }, [selectedStationId, timeRange]);
 
   // Filter stations based on region query ("if i type region i want all region")
   const filteredStations: NoaaStation[] = searchNoaaStationsAndRegions(regionQuery);
@@ -111,7 +112,7 @@ function OceanDashboard() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => loadData(selectedStationId)}
+            onClick={() => loadData(selectedStationId, timeRange)}
             disabled={loading}
             className="size-9 rounded-xl"
             title="Refresh NOAA Data"
@@ -285,9 +286,11 @@ function OceanDashboard() {
       </div>
 
       {/* Forecast Charts */}
-      <Tabs defaultValue="24h" className="mt-8">
+      <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as any)} className="mt-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold">24-Hour Regional Forecast & Observations</h2>
+          <h2 className="text-xl font-semibold">
+            {timeRange === "24h" ? "24-Hour" : timeRange === "7d" ? "7-Day" : "30-Day"} Regional Forecast & Observations
+          </h2>
           <TabsList>
             <TabsTrigger value="24h">24 Hours</TabsTrigger>
             <TabsTrigger value="7d">7 Days</TabsTrigger>
@@ -316,7 +319,7 @@ function OceanDashboard() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="hour" tick={{ fontSize: 10 }} interval={5} stroke="var(--muted-foreground)" />
+                    <XAxis dataKey="time" tick={{ fontSize: 10 }} interval={5} stroke="var(--muted-foreground)" />
                     <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" domain={["auto", "auto"]} />
                     <Tooltip {...chartStyle} />
                     <Area
@@ -330,7 +333,7 @@ function OceanDashboard() {
                 ) : (
                   <LineChart data={trend}>
                     <CartesianGrid stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="hour" tick={{ fontSize: 10 }} interval={5} stroke="var(--muted-foreground)" />
+                    <XAxis dataKey="time" tick={{ fontSize: 10 }} interval={5} stroke="var(--muted-foreground)" />
                     <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" domain={["auto", "auto"]} />
                     <Tooltip {...chartStyle} />
                     <Line type="monotone" dataKey={c.key} stroke={c.color} strokeWidth={2} dot={false} />
