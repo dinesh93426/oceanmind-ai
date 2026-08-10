@@ -93,6 +93,7 @@ Output strictly valid JSON with no markdown formatting or backticks:
         ],
         response_format: { type: "json_object" },
         temperature: 0.2,
+        max_tokens: 800,
       }),
     });
 
