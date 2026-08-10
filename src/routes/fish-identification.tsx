@@ -175,6 +175,54 @@ function FishIdentification() {
       }))
     : defaultSimilar;
 
+  const handleDownloadPDF = () => {
+    window.print();
+  };
+
+  const handleDownloadCSV = () => {
+    if (!result) return;
+    const csvContent = [
+      ["Metric", "Value"],
+      ...displayDetails.map(([key, val]) => [key, `"${String(val).replace(/"/g, '""')}"`])
+    ].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${displayCommon.replace(/\s+/g, '_')}_Report.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadExcel = () => {
+    if (!result) return;
+    const tsvContent = [
+      ["Metric", "Value"],
+      ...displayDetails
+    ].map(e => e.join("\t")).join("\n");
+    const blob = new Blob([tsvContent], { type: "application/vnd.ms-excel" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${displayCommon.replace(/\s+/g, '_')}_Report.xls`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadImage = () => {
+    if (!fileUrl) return;
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = `fish_image_${Date.now()}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 pt-12">
       <h1 className="text-3xl font-bold sm:text-4xl">Fish Identification</h1>
@@ -380,16 +428,16 @@ function FishIdentification() {
             </Tabs>
 
             <div className="glass flex flex-wrap gap-2 rounded-[2rem] p-6">
-              <Button variant="ocean" size="sm">
+              <Button variant="ocean" size="sm" onClick={handleDownloadPDF}>
                 <Download className="size-4" /> PDF report
               </Button>
-              <Button variant="glass" size="sm">
+              <Button variant="glass" size="sm" onClick={handleDownloadCSV}>
                 <FileSpreadsheet className="size-4" /> CSV
               </Button>
-              <Button variant="glass" size="sm">
+              <Button variant="glass" size="sm" onClick={handleDownloadExcel}>
                 <FileSpreadsheet className="size-4" /> Excel
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={handleDownloadImage}>
                 <ImageIcon className="size-4" /> Image summary
               </Button>
             </div>
