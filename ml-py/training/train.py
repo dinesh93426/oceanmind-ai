@@ -31,17 +31,6 @@ def get_project_paths():
     models_dir = Path(os.getenv("MODELS_DIR", str(base_dir / "models")))
     return base_dir, dataset_dir, models_dir
 
-class SquarePad:
-    def __call__(self, img):
-        w, h = img.size
-        if w != h:
-            max_side = max(w, h)
-            padded = Image.new("RGB", (max_side, max_side), (255, 255, 255))
-            offset_x = (max_side - w) // 2
-            offset_y = (max_side - h) // 2
-            padded.paste(img, (offset_x, offset_y))
-            return padded
-        return img
 
 def train_model():
     base_dir, dataset_dir, models_dir = get_project_paths()
@@ -74,8 +63,7 @@ def train_model():
 
     # Fast Training Transforms
     train_transform = transforms.Compose([
-        SquarePad(),
-        transforms.Resize((224, 224)),
+        transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.ToTensor(),
         transforms.Normalize(
@@ -85,8 +73,8 @@ def train_model():
     ])
 
     val_transform = transforms.Compose([
-        SquarePad(),
-        transforms.Resize((224, 224)),
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
