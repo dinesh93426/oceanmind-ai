@@ -60,6 +60,7 @@ async def startup_event():
         logger.error(f"Failed to load PyTorch model during startup: {str(e)}")
 
 @app.get("/", tags=["Health"])
+@app.head("/", tags=["Health"])
 def root_endpoint():
     """Welcome endpoint."""
     return {
