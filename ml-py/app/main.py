@@ -14,6 +14,7 @@ import time
 import logging
 from pathlib import Path
 from typing import Dict, Any
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,11 +30,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger("fish_ml_service")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Load PyTorch model into memory on startup."""
+    logger.info("Initializing Fish ML Service...")
+    try:
+        predictor = get_predictor()
+        logger.info(f"Model loaded successfully with {predictor.num_classes} species classes.")
+    except Exception as e:
+        logger.error(f"Failed to load PyTorch model during startup: {str(e)}")
+    yield
+
 # Initialize FastAPI App
 app = FastAPI(
     title="Fish Identification ML Service",
     description="PyTorch EfficientNet-B0 Fish Species Identification API",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # CORS Configuration (Step 25 Security)
@@ -48,16 +61,6 @@ app.add_middleware(
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB limit
 ALLOWED_MIME_TYPES = {"image/png", "image/jpeg", "image/jpg", "image/webp"}
 ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
-
-@app.on_event("startup")
-async def startup_event():
-    """Load PyTorch model into memory on startup."""
-    logger.info("Initializing Fish ML Service...")
-    try:
-        predictor = get_predictor()
-        logger.info(f"Model loaded successfully with {predictor.num_classes} species classes.")
-    except Exception as e:
-        logger.error(f"Failed to load PyTorch model during startup: {str(e)}")
 
 @app.api_route("/", methods=["GET", "HEAD"])
 async def root():
