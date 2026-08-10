@@ -59,7 +59,7 @@ async def startup_event():
     except Exception as e:
         logger.error(f"Failed to load PyTorch model during startup: {str(e)}")
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def root():
     return {
         "service": "AquaIntel AI ML Backend",
@@ -67,7 +67,7 @@ async def root():
         "docs": "/docs"
     }
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health():
     try:
         predictor = get_predictor()
