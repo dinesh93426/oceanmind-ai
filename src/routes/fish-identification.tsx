@@ -214,9 +214,9 @@ function FishIdentification() {
   };
 
   const handleDownloadImage = () => {
-    if (!fileUrl) return;
+    if (!image) return;
     const link = document.createElement("a");
-    link.href = fileUrl;
+    link.href = image;
     link.download = `fish_image_${Date.now()}.jpg`;
     document.body.appendChild(link);
     link.click();
