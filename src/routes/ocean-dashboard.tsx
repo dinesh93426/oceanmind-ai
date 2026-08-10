@@ -354,7 +354,7 @@ function OceanDashboard() {
               Predictive ocean heatmap for {activeStation.name} ({activeStation.oceanBasin})
             </p>
           </div>
-          <Button variant="glass" size="sm" onClick={() => loadData(selectedStationId)}>
+          <Button variant="glass" size="sm" onClick={() => loadData(selectedStationId, timeRange)}>
             <Waves className="size-4" /> Recompute Model
           </Button>
         </div>
