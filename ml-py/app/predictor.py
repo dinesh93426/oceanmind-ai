@@ -88,16 +88,6 @@ class FishPredictor:
         # Always convert to RGB (handles RGBA, Grayscale, etc.)
         img = img.convert("RGB")
 
-        # Pad image to square to preserve natural aspect ratio & morphology before resizing
-        w, h = img.size
-        if w != h:
-            max_side = max(w, h)
-            padded_img = Image.new("RGB", (max_side, max_side), (255, 255, 255))
-            offset_x = (max_side - w) // 2
-            offset_y = (max_side - h) // 2
-            padded_img.paste(img, (offset_x, offset_y))
-            return padded_img
-
         return img
 
     def predict(self, image_input: Union[str, Path, bytes, Image.Image], top_k: int = 5) -> Dict[str, Any]:
@@ -119,6 +109,7 @@ class FishPredictor:
         # Transform & Tensor conversion
         tensor_img = self.transform(image).unsqueeze(0).to(self.device)
 
+        assert self.model is not None
         with torch.no_grad():
             outputs = self.model(tensor_img)
             probabilities = torch.softmax(outputs, dim=1)[0]
