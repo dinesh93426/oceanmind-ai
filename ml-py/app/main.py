@@ -59,24 +59,53 @@ async def startup_event():
     except Exception as e:
         logger.error(f"Failed to load PyTorch model during startup: {str(e)}")
 
-@app.get("/", tags=["Health"])
-@app.head("/", tags=["Health"])
-def root_endpoint():
-    """Welcome endpoint."""
+@app.get("/")
+async def root():
     return {
-        "service": "Fish Identification ML Service",
-        "version": "1.0.0",
+        "service": "AquaIntel AI ML Backend",
         "status": "online",
-        "docs_url": "/docs"
+        "docs": "/docs"
     }
 
-@app.get("/health", tags=["Health"])
-def health_check():
-    """Lightweight health check endpoint for keeping server awake."""
-    return {
-        "status": "ok",
-        "service": "mlpyserver"
-    }
+@app.get("/health")
+async def health():
+    try:
+        predictor = get_predictor()
+        if predictor.model is None:
+            predictor.load_model()
+        return {
+            "status": "ok",
+            "model_loaded": predictor.model is not None,
+            "classes_loaded": len(predictor.classes_map) > 0,
+            "model_classes": predictor.model.classifier[1].out_features if predictor.model else 0,
+            "class_names": len(predictor.classes_map)
+        }
+    except Exception as e:
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={
+            "status": "error",
+            "model_loaded": False,
+            "error": str(e)
+        })
+
+@app.get("/model-info")
+async def model_info():
+    try:
+        predictor = get_predictor()
+        if predictor.model is None:
+            predictor.load_model()
+        return {
+            "model_loaded": predictor.model is not None,
+            "input_shape": [1, 3, 224, 224],
+            "output_classes": predictor.model.classifier[1].out_features if predictor.model else 0,
+            "class_mapping_loaded": len(predictor.classes_map) > 0,
+            "class_mapping_count": len(predictor.classes_map),
+            "preprocessing": "Resize(256) -> CenterCrop(224) -> ToTensor -> Normalize(ImageNet)"
+        }
+    except Exception as e:
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={
+            "success": False,
+            "error": str(e)
+        })
 
 @app.head("/health", tags=["Health"])
 def health_check_head():

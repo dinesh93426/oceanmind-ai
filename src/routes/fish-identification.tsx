@@ -137,34 +137,34 @@ function FishIdentification() {
 
   const isIdentified = result?.identified ?? true;
   const displayCommon = isIdentified
-    ? (activePred?.common_name || activeTop?.common_name || defaultFish.common)
+    ? (activePred?.common_name || activeTop?.common_name || "Unknown")
     : "Unconfident Identification";
   const displayScientific = isIdentified
-    ? (activePred?.scientific_name || activeTop?.scientific_name || defaultFish.scientific)
+    ? (activePred?.scientific_name || activeTop?.scientific_name || "Unknown")
     : (activeTop?.common_name ? `Low Confidence Candidate: ${activeTop.common_name}` : "Upload a clearer photo");
-  const displayConfidence = activePred?.confidence ?? activeTop?.confidence ?? defaultFish.confidence;
+  const displayConfidence = activePred?.confidence ?? activeTop?.confidence;
 
   const displayDetails = [
     ["Scientific Name", displayScientific],
     ["Common Name", displayCommon],
-    ["Family", activeFish?.family || defaultFish.family],
-    ["Habitat", activeFish?.habitat || defaultFish.habitat],
-    ["Diet", activeFish?.diet || defaultFish.diet],
-    ["Average Lifespan", activeFish?.lifespan || defaultFish.lifespan],
-    ["Average Size", activeFish?.size || defaultFish.size],
-    ["Danger Level", activeFish?.danger || defaultFish.danger],
-    ["Commercial Value", activeFish?.commercial || defaultFish.commercial],
-    ["IUCN Status", activeFish?.conservation_status || defaultFish.iucn],
-    ["Distribution", activeFish?.distribution || defaultFish.distribution],
-    ["Reproduction", activeFish?.reproduction || defaultFish.reproduction],
-    ["Migration Pattern", activeFish?.migration || defaultFish.migration],
-    ["Behavior", activeFish?.behavior || defaultFish.behavior],
-    ["Nutrition", activeFish?.nutrition || defaultFish.nutrition],
-    ["Fishing Season", activeFish?.season || defaultFish.season],
-    ["Predators", activeFish?.predators || defaultFish.predators],
+    ["Family", activeFish?.family || "Unknown"],
+    ["Habitat", activeFish?.habitat || "Unknown"],
+    ["Diet", activeFish?.diet || "Unknown"],
+    ["Average Lifespan", activeFish?.lifespan || "Unknown"],
+    ["Average Size", activeFish?.size || "Unknown"],
+    ["Danger Level", activeFish?.danger || "Unknown"],
+    ["Commercial Value", activeFish?.commercial || "Unknown"],
+    ["IUCN Status", activeFish?.conservation_status || "Unknown"],
+    ["Distribution", activeFish?.distribution || "Unknown"],
+    ["Reproduction", activeFish?.reproduction || "Unknown"],
+    ["Migration Pattern", activeFish?.migration || "Unknown"],
+    ["Behavior", activeFish?.behavior || "Unknown"],
+    ["Nutrition", activeFish?.nutrition || "Unknown"],
+    ["Fishing Season", activeFish?.season || "Unknown"],
+    ["Predators", activeFish?.predators || "Unknown"],
   ];
 
-  const factsList = activeFish?.facts || defaultFish.facts;
+  const factsList = activeFish?.facts || [];
 
   // Alternatives mapping
   const alternativesList = result?.alternatives && result.alternatives.length > 0

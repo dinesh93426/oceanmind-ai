@@ -65,7 +65,12 @@ class FishPredictor:
         # Initialize EfficientNet-B0 architecture
         self.model = efficientnet_b0()
         num_features = self.model.classifier[1].in_features
-        self.model.classifier[1] = nn.Linear(num_features, self.num_classes)
+        num_classes = len(self.classes_map)
+        self.model.classifier[1] = nn.Linear(num_features, num_classes)
+
+        # Ensure strict mapping consistency
+        if self.model.classifier[1].out_features != len(self.classes_map):
+            raise RuntimeError(f"Model/class mapping mismatch: model outputs {self.model.classifier[1].out_features}, but classes mapping has {len(self.classes_map)}")
 
         state_dict = torch.load(self.model_path, map_location=self.device)
         self.model.load_state_dict(state_dict)

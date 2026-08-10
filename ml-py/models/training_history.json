@@ -1,17 +1,17 @@
 {
   "train_loss": [
-    4.7045,
-    2.1928
+    5.3574,
+    3.6869
   ],
   "val_loss": [
-    3.0322,
-    2.6116
+    3.9035,
+    3.5256
   ],
   "val_accuracy": [
-    55.33,
-    63.88
+    34.27,
+    41.06
   ],
-  "best_val_accuracy": 63.88,
+  "best_val_accuracy": 41.06,
   "epochs_trained": 2,
-  "total_training_time_seconds": 1620.35
+  "total_training_time_seconds": 656.78
 }
